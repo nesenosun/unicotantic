@@ -1,0 +1,78 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "unic-otantic-e4f32",
+          "appId": "1:1001866780856:android:b2ff9782a646740d86144d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "unic-otantic-e4f32",
+          "configurations": {
+            "android": "1:1001866780856:android:b2ff9782a646740d86144d",
+            "ios": "1:1001866780856:ios:cea79d466542728686144d",
+            "macos": "1:1001866780856:ios:cea79d466542728686144d",
+            "web": "1:1001866780856:web:8c68f098d36dc84186144d",
+            "windows": "1:1001866780856:web:2d8ca866f200728f86144d"
+          }
+        }
+      }
+    }
+  },
+  "hosting": [
+    {
+      "site": "nesenosun",
+      "public": "build/web",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "site": "unicotantic",
+      "public": "build/web",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "site": "unic-otantic-e4f32",
+      "public": "build/web",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ],
+  "firestore": {
+    "database": "(default)",
+    "location": "nam5",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

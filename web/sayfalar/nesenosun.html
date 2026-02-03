@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ersin Boçnak - Portföy</title>
+    <style>
+        body {
+          margin: 0;
+          font-family: "Arial", sans-serif;
+          background-color: #121212;
+          color: white;
+        }
+
+        header {
+          position: relative;
+          height: 320px;
+          background: url("assets/images/logo/playStoreArkaPlan.png") no-repeat center/cover;
+          border-bottom-left-radius: 30px;
+          border-bottom-right-radius: 30px;
+          overflow: hidden;
+        }
+
+        header::after {
+          content: "";
+          position: absolute;
+          top: 0; left: 0;
+          width: 100%; height: 100%;
+          background: rgba(0,0,0,0.5);
+        }
+
+        .profile {
+          position: absolute;
+          top: 30px;
+          left: 50%;
+          transform: translateX(-50%);
+          text-align: center;
+          z-index: 1;
+        }
+
+        .profile img {
+          border: 4px solid #fff;
+          border-radius: 50%;
+          width: 100px;
+          height: 100px;
+        }
+
+        .profile h1 {
+          margin: 12px 0 4px;
+          font-size: 28px;
+          font-weight: bold;
+        }
+
+        .profile p {
+          margin: 0;
+          font-size: 16px;
+          color: #aaa;
+        }
+
+        .social-icons {
+          margin-top: 12px;
+          display: flex;
+          justify-content: center;
+          gap: 16px;
+        }
+
+        .social-icons img {
+          width: 32px;
+          height: 32px;
+          cursor: pointer;
+        }
+
+        h2 {
+          margin: 20px 16px;
+          font-size: 22px;
+          font-weight: bold;
+          letter-spacing: 1.5px;
+        }
+
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 16px;
+          padding: 0 16px 30px;
+        }
+
+        .card {
+          background: #1e1e1e;
+          border-radius: 16px;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+        }
+
+        .card img {
+          width: 100%;
+          height: 160px;
+          object-fit: cover;
+        }
+
+        .card h3 {
+          margin: 8px;
+          text-align: center;
+          font-size: 16px;
+        }
+
+        .card .actions {
+          margin-top: auto;
+        }
+
+        .card .actions a {
+          display: block;
+          text-align: center;
+          padding: 10px;
+          text-decoration: none;
+          color: white;
+          background: rgba(0,0,0,0.3);
+          font-size: 14px;
+        }
+
+        .card .actions a img {
+          width: 24px;
+          height: 24px;
+          vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Banner -->
+<header>
+    <div class="profile">
+        <img src="../assets/images/logo/ersinis.jpg" alt="Ersin Boçnak">
+        <h1>Ersin Boçnak</h1>
+        <p>Flutter & Dart Developer</p>
+        <div class="social-icons">
+            <a href="https://www.linkedin.com/in/ersin-bo%C3%A7nak-162603218/" target="_blank">
+                <img src="../assets/images/png/linko.png" alt="LinkedIn">
+            </a>
+            <a href="https://www.youtube.com/@nesenosun" target="_blank">
+                <img src="../assets/images/png/youtube.png" alt="YouTube">
+            </a>
+            <a href="https://www.facebook.com/nesenosun" target="_blank">
+                <img src="../assets/images/png/facebook.png" alt="Facebook">
+            </a>
+            <a href="https://twitter.com/nesenosun" target="_blank">
+                <img src="../assets/images/png/x.png" alt="Twitter">
+            </a>
+            <a href="https://www.instagram.com/sinermis/" target="_blank">
+                <img src="../assets/images/png/instagram.png" alt="Instagram">
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Projeler Başlığı -->
+<h2>PROJELER</h2>
+
+<!-- Grid Kartlar -->
+<div class="grid">
+    <!-- Kart 1 -->
+    <div class="card">
+        <img src="../assets/images/logo/pacabc.jpg" alt="PacABC">
+        <h3>PacABC</h3>
+        <div class="actions">
+            <a href="https://play.google.com/store/apps/details?id=com.akisunicotantic.akis_unic_otantic" target="_blank">
+                <img src="../assets/images/png/googleplaystore.png" alt="Google Play">
+            </a>
+            <a href="https://pac-abc.web.app/" target="_blank">pac-abc.web.app</a>
+        </div>
+    </div>
+
+    <!-- Kart 2 -->
+    <div class="card">
+        <img src="../assets/images/logo/unipuzzle.jpg" alt="Uni Puzzle">
+        <h3>Uni Puzzle</h3>
+        <div class="actions">
+            <a href="https://play.google.com/store/apps/details?id=com.puzzlenesenosun.puzzle" target="_blank">
+                <img src="../assets/images/png/googleplaystore.png" alt="Google Play">
+            </a>
+            <a href="https://puzzle-unic.web.app/" target="_blank">puzzle-unic.web.app</a>
+        </div>
+    </div>
+
+    <!-- Kart 3 -->
+    <div class="card">
+        <img src="../assets/images/logo/akis.jpg" alt="Unic Otantic Akış">
+        <h3>Unic Otantic Akış</h3>
+        <div class="actions">
+            <a href="https://play.google.com/store/apps/details?id=com.unicotantic.unicotantic" target="_blank">
+                <img src="../assets/images/png/googleplaystore.png" alt="Google Play">
+            </a>
+            <a href="https://unicotantic.web.app/" target="_blank">unicotantic.web.app</a>
+        </div>
+    </div>
+
+    <!-- Kart 4 -->
+    <div class="card">
+        <img src="../assets/images/logo/unicverse.png" alt="Unicverse">
+        <h3>Unicverse</h3>
+        <div class="actions">
+            <a href="https://play.google.com/store/apps/details?id=com.unicakis.unicakis" target="_blank">
+                <img src="../assets/images/png/googleplaystore.png" alt="Google Play">
+            </a>
+            <a href="https://unicverse.web.app/" target="_blank">unicverse.web.app</a>
+        </div>
+    </div>
+
+    <!-- Kart 5 -->
+
+    <div class="card">
+        <img src="../assets/images/logo/pacabcd.jpg" alt="PacABCD">
+        <h3>PacABCD</h3>
+        <div class="actions">
+            <a href="https://play.google.com/store/apps/details?id=com.abcd.pacabcd" target="_blank">
+                <img src="../assets/images/png/googleplaystore.png" alt="Google Play">
+            </a>
+            <a href="https://pacabcd.web.app/" target="_blank">pacabcd.web.app</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
