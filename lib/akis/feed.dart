@@ -5,9 +5,11 @@ import 'package:unicotantic/Unic/fonksiyonlar/buildDefaultTextStyle.dart';
 import 'package:unicotantic/akis/feed_video_player.dart';
 import 'package:unicotantic/akis/post_olustur_panel.dart';
 import 'package:unicotantic/models/post_model.dart';
+import 'package:unicotantic/akis/post_ayrintilari.dart';
 
 import '../Unic/doluAkis/doluAkisAppBar.dart';
 import '../Unic/fonksiyonlar/postSabitleri.dart';
+import '../core/voice/widgets/voice_bottom_bar.dart';
 
 class FeedSayfasi extends StatefulWidget {
   const FeedSayfasi({super.key});
@@ -45,6 +47,7 @@ class _FeedSayfasiState extends State<FeedSayfasi> {
         backgroundColor: Colors.cyan,
         child: const Icon(Icons.add, color: Colors.white, size: 30),
       ),
+      bottomNavigationBar: const VoiceBottomBar(currentTab: VoiceBottomBarTab.home),
       body: StreamBuilder<DocumentSnapshot>(
         stream: _firestore.collection('Kullanicilar').doc(kullanici.email).snapshots(),
         builder: (context, userSnap) {
@@ -76,49 +79,59 @@ class _FeedSayfasiState extends State<FeedSayfasi> {
                   List begenList = docData['begen'] ?? [];
                   List begenMeList = docData['begenMe'] ?? [];
 
-                  return Card(
-                    color: Colors.grey[900],
-                    margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Üst Bölüm: Kullanıcı Bilgileri ve Silme Menüsü
-                        ustBolumKullaniciKimligi(
-                            post.postID,
-                            docData['email'] ?? post.email,
-                            docData['tarih'] ?? "${post.createdAt.day}/${post.createdAt.month}/${post.createdAt.year}",
-                            docs,
-                            index),
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PostAyrintilari(postID: post.postID),
+                        ),
+                      );
+                    },
+                    child: Card(
+                      color: Colors.grey[900],
+                      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Üst Bölüm: Kullanıcı Bilgileri ve Silme Menüsü
+                          ustBolumKullaniciKimligi(
+                              post.postID,
+                              docData['email'] ?? post.email,
+                              docData['tarih'] ?? "${post.createdAt.day}/${post.createdAt.month}/${post.createdAt.year}",
+                              docs,
+                              index),
 
-                        // Orta Bölüm: Metin İçeriği
-                        ikinciBolumText(post.text),
+                          // Orta Bölüm: Metin İçeriği
+                          ikinciBolumText(post.text),
 
-                        // Medya Bölümü
-                        if (post.mediaUrl != null && post.mediaUrl != 'bos' && post.mediaUrl != '')
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: Card(
-                              clipBehavior: Clip.antiAlias,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                              child: post.mediaType == 'video'
-                                  ? FeedVideoPlayer(videoUrl: post.mediaUrl!)
-                                  : Image.network(post.mediaUrl!, fit: BoxFit.cover, width: double.infinity),
+                          // Medya Bölümü
+                          if (post.mediaUrl != null && post.mediaUrl != 'bos' && post.mediaUrl != '')
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              child: Card(
+                                clipBehavior: Clip.antiAlias,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                child: post.mediaType == 'video'
+                                    ? FeedVideoPlayer(videoUrl: post.mediaUrl!)
+                                    : Image.network(post.mediaUrl!, fit: BoxFit.cover, width: double.infinity),
+                              ),
                             ),
-                          ),
 
-                        // Alt Bölüm: Firestore alan isimlerine (begen, begenMe) göre eşleşme
-                        DorduncuBolumAltBar(
-                            docData['email'] ?? post.email,
-                            docs,
-                            index,
-                            begenMeList.contains(kullanici.email),
-                            docs[index].reference.update,
-                            begenMeList,
-                            begenList.contains(kullanici.email),
-                            begenList,
-                            post.postID,
-                            docData['yorumSayisi'] ?? post.commentCount),
-                      ],
+                          // Alt Bölüm: Firestore alan isimlerine (begen, begenMe) göre eşleşme
+                          DorduncuBolumAltBar(
+                              docData['email'] ?? post.email,
+                              docs,
+                              index,
+                              begenMeList.contains(kullanici.email),
+                              docs[index].reference.update,
+                              begenMeList,
+                              begenList.contains(kullanici.email),
+                              begenList,
+                              post.postID,
+                              docData['yorumSayisi'] ?? post.commentCount),
+                        ],
+                      ),
                     ),
                   );
                 },

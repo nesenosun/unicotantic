@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -5,6 +6,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'services/api_service.dart';
 import 'services/sync_service.dart';
 import 'models/message.dart';
+import '../../core/voice/widgets/voice_bottom_bar.dart';
 
 class UnicaChatPage extends StatefulWidget {
   const UnicaChatPage({super.key});
@@ -95,7 +97,11 @@ class _UnicaChatPageState extends State<UnicaChatPage> {
   void _initTts() async {
     await _flutterTts.setLanguage("tr-TR");
     await _flutterTts.setPitch(1.33); // Daha canlı bir ton
-    await _flutterTts.setSpeechRate(1.05); // Biraz daha hızlı
+    if (Platform.isMacOS) {
+      await _flutterTts.setSpeechRate(0.35); // macOS için çok daha yavaş
+    } else {
+      await _flutterTts.setSpeechRate(1.05); // Mobil için normal hız
+    }
 
     _flutterTts.setCompletionHandler(() {
       setState(() => _speakingIndex = null);
@@ -209,6 +215,7 @@ class _UnicaChatPageState extends State<UnicaChatPage> {
           ],
         ),
       ),
+      bottomNavigationBar: const VoiceBottomBar(),
       body: Column(
         children: [
           Expanded(

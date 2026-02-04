@@ -6,9 +6,9 @@ import 'package:unicotantic/Unic/bildirimler/bildirim.dart';
 import 'package:unicotantic/Unic/fonksiyonlar/buildDefaultTextStyle.dart';
 import 'package:unicotantic/Unic/fonksiyonlar/reklamAnasayfa.dart';
 import 'package:unicotantic/Unic/fonksiyonlar/reklamGoster.dart';
-import 'package:unicotantic/login/auth_kontrol.dart';
-import 'package:unicotantic/profil/profilBilgilerim.dart';
 import 'package:unicotantic/Unic/yapayZeka/unica_chat_page.dart';
+import 'package:unicotantic/login/auth_kontrol.dart';
+import 'package:unicotantic/profil/kullanici_profil_sayfasi.dart';
 
 AppBar akisAppBar() {
   final kullanici = FirebaseAuth.instance.currentUser!;
@@ -28,11 +28,10 @@ AppBar akisAppBar() {
     ),
     actions: <Widget>[
       doluBenDrawerAcilir(),
-      unicaAIGit(),
+      // unicaAIGit(), // REMOVED - Now in bottom bar
       unicSayisalGosterim(icerik),
       ikinciBolumUnicYazisi(),
       bildirimGosterim(icerik),
-      profileGit(icerik),
     ],
     backgroundColor: Colors.transparent,
     elevation: 0,
@@ -262,7 +261,7 @@ Expanded profileGit(DocumentReference<Object?> icerik) {
                   }
                 }),
           ),
-          onTap: () => Get.to(ProfilBilgilerim()),
+          onTap: () => Get.to(KullaniciProfilSayfasi()),
         ),
       ),
     ),

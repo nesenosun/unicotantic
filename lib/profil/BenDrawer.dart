@@ -6,17 +6,17 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:unicotantic/Unic/fonksiyonlar/buildDefaultTextStyle.dart';
-import 'package:unicotantic/profil/ayarlar.dart';
-import 'package:unicotantic/profil/engelliler.dart';
 import 'package:unicotantic/Unic/sosyalMedya/YouTube.dart';
 import 'package:unicotantic/Unic/sosyalMedya/facebook.dart';
 import 'package:unicotantic/Unic/sosyalMedya/googleiwebview.dart';
 import 'package:unicotantic/Unic/sosyalMedya/instagram.dart';
 import 'package:unicotantic/Unic/sosyalMedya/twitter.dart';
-
 import 'package:unicotantic/login/auth_kontrol.dart';
+import 'package:unicotantic/profil/ayarlar.dart';
+import 'package:unicotantic/profil/engelliler.dart';
+import 'package:unicotantic/profil/kullanici_profil_sayfasi.dart';
+
 import 'arkadaslar.dart';
-import 'profilBilgilerim.dart';
 
 class BenDrawer extends StatefulWidget {
   const BenDrawer({Key? key}) : super(key: key);
@@ -49,16 +49,13 @@ class _BenDrawerState extends State<BenDrawer> {
                   decoration: const BoxDecoration(),
                   child: GestureDetector(
                     onTap: () {
-                      Get.off(const ProfilBilgilerim());
+                      Get.off(const KullaniciProfilSayfasi());
                     },
                     child: StreamBuilder<DocumentSnapshot>(
                         stream: icerik.snapshots(),
-                        builder: (BuildContext context,
-                            AsyncSnapshot asyncSnapshot) {
+                        builder: (BuildContext context, AsyncSnapshot asyncSnapshot) {
                           if (asyncSnapshot.hasError) {
-                            return const Center(
-                                child:
-                                    Text('Bir hata oluştu tekrar deneyin..'));
+                            return const Center(child: Text('Bir hata oluştu tekrar deneyin..'));
                           } else {
                             if (asyncSnapshot.hasData) {
                               return Container(
@@ -75,8 +72,7 @@ class _BenDrawerState extends State<BenDrawer> {
                                                 fontWeight: FontWeight.bold,
                                                 shadows: [
                                                   BoxShadow(
-                                                      color: Colors.red
-                                                          .withOpacity(.15),
+                                                      color: Colors.red.withOpacity(.15),
                                                       offset: Offset(2.0, 2.0),
                                                       blurRadius: 10),
                                                 ]),
@@ -129,10 +125,7 @@ class _BenDrawerState extends State<BenDrawer> {
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: SizedBox(
-                            height: 50,
-                            child:
-                                Image.asset('assets/images/png/youtube.png')),
+                        child: SizedBox(height: 50, child: Image.asset('assets/images/png/youtube.png')),
                       ),
                     ),
                     GestureDetector(
@@ -143,10 +136,7 @@ class _BenDrawerState extends State<BenDrawer> {
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: SizedBox(
-                            height: 50,
-                            child:
-                                Image.asset('assets/images/png/facebook.png')),
+                        child: SizedBox(height: 50, child: Image.asset('assets/images/png/facebook.png')),
                       ),
                     ),
                     GestureDetector(
@@ -157,10 +147,7 @@ class _BenDrawerState extends State<BenDrawer> {
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: SizedBox(
-                            height: 50,
-                            child:
-                                Image.asset('assets/images/png/instagram.png')),
+                        child: SizedBox(height: 50, child: Image.asset('assets/images/png/instagram.png')),
                       ),
                     ),
                   ],
@@ -177,9 +164,7 @@ class _BenDrawerState extends State<BenDrawer> {
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: SizedBox(
-                            height: 50,
-                            child: Image.asset('assets/images/png/x.png')),
+                        child: SizedBox(height: 50, child: Image.asset('assets/images/png/x.png')),
                       ),
                     ),
                     GestureDetector(
@@ -190,10 +175,7 @@ class _BenDrawerState extends State<BenDrawer> {
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: SizedBox(
-                            height: 50,
-                            child:
-                                Image.asset('assets/images/png/googlei.png')),
+                        child: SizedBox(height: 50, child: Image.asset('assets/images/png/googlei.png')),
                       ),
                     ),
                     GestureDetector(
@@ -204,10 +186,7 @@ class _BenDrawerState extends State<BenDrawer> {
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: SizedBox(
-                            height: 50,
-                            width: 50,
-                            child: Image.asset('assets/images/png/akis.png')),
+                        child: SizedBox(height: 50, width: 50, child: Image.asset('assets/images/png/akis.png')),
                       ),
                     ),
                   ],
@@ -245,8 +224,7 @@ class _BenDrawerState extends State<BenDrawer> {
                     ),
                     Center(
                       child: Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 3, vertical: 3),
+                        padding: EdgeInsets.symmetric(horizontal: 3, vertical: 3),
                         child: Icon(
                           Icons.settings,
                           size: 20,
@@ -318,8 +296,7 @@ class _BenDrawerState extends State<BenDrawer> {
             GestureDetector(
               onTap: () async {
                 //SystemNavigator.pop();
-                Get.to(Engelliler(
-                    gelenKullaniciEmail: kullanici.email.toString()));
+                Get.to(Engelliler(gelenKullaniciEmail: kullanici.email.toString()));
 
                 setState(() {});
               },
@@ -393,10 +370,7 @@ class _BenDrawerState extends State<BenDrawer> {
                 color: Colors.greenAccent,
                 fontWeight: FontWeight.bold,
                 shadows: [
-                  BoxShadow(
-                      color: Colors.red.withOpacity(.15),
-                      offset: Offset(2.0, 2.0),
-                      blurRadius: 10),
+                  BoxShadow(color: Colors.red.withOpacity(.15), offset: Offset(2.0, 2.0), blurRadius: 10),
                 ]),
             textAlign: TextAlign.center,
           ),

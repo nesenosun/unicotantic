@@ -4,12 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:unicotantic/Unic/fonksiyonlar/reklamAnasayfa.dart';
-import 'package:unicotantic/profil/profilBilgilerim.dart';
+import 'package:unicotantic/profil/kullanici_profil_sayfasi.dart';
 import 'package:unicotantic/profil/profil_fotograf_degistir.dart';
 
 import '../Unic/fonksiyonlar/buildDefaultTextStyle.dart';
 import '../login/auth_kontrol.dart';
-import 'profilYorumBolumu.dart';
 
 AppBar ProilAppBar() {
   final kullanici = FirebaseAuth.instance.currentUser!;
@@ -106,7 +105,7 @@ AppBar ProilAppBar() {
                 children: [
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => Get.off(ProfilBilgilerim()),
+                      onTap: () => Get.off(KullaniciProfilSayfasi()),
                       child: Card(
                         color: Colors.deepPurpleAccent,
                         child: Padding(
@@ -127,7 +126,7 @@ AppBar ProilAppBar() {
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        Get.to(ProfilYorumBolumu());
+                        //Get.to(ProfilYorumBolumu());
                       },
                       child: Card(
                         child: Padding(

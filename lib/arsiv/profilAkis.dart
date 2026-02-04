@@ -1,3 +1,4 @@
+/*
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,15 +10,15 @@ import 'package:get_storage/get_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:unicotantic/profil/baskaAkisaMetinGirYeni.dart';
-import 'package:unicotantic/profil/bireyselAkis.dart';
+import 'package:unicotantic/arsiv/bireyselAkis.dart';
 
 import '../Unic/doluAkis/doluAkisAppBar.dart';
 import '../Unic/fonksiyonlar/kullaniciProfilUstBar.dart';
-import 'BenDrawer.dart';
-import 'ayarlar.dart';
-import 'profilBilgilerim.dart';
-import 'profilYorumBolumu.dart';
-import 'profil_fotograf_degistir.dart';
+import '../profil/BenDrawer.dart';
+import '../profil/ayarlar.dart';
+import '../profil/profilBilgilerim.dart';
+import '../profil/profilYorumBolumu.dart';
+import '../profil/profil_fotograf_degistir.dart';
 
 ///////////////////////////////////
 class ProfilAkis extends StatefulWidget {
@@ -289,3 +290,4 @@ class _ProfilAkisState extends State<ProfilAkis> {
 
   ///
 }
+*/

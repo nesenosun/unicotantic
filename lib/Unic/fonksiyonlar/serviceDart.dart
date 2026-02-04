@@ -41,14 +41,13 @@ class FirebaseNotification {
           opacity: 0.5,
           position: SnackbarPosition.top);
     });
-    messaging.getToken().then((value) => log('token: $value', name: 'fcm tken'));
-
-    FirebaseFirestore.instance
-        // ignore: prefer_adjacent_string_concatenation
-        .collection("token")
-        .doc(messaging.getToken().toString())
-        .set({
-      'token': messaging.getToken().then((value) => log('token: $value', name: 'fcm tken')),
-    });
+    String? token = await messaging.getToken();
+    if (token != null) {
+      log('token: $token', name: 'fcm tken');
+      FirebaseFirestore.instance
+          .collection("token")
+          .doc(token)
+          .set({'token': token});
+    }
   }
 }

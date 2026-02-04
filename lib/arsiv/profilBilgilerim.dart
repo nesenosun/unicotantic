@@ -1,45 +1,92 @@
+/*
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:unicotantic/Unic/doluAkis/doluYorumOku.dart';
-import 'package:unicotantic/profil/profilBilgilerim.dart';
-import 'package:unicotantic/profil/profil_fotograf_degistir.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:unicotantic/profil/ayarlar.dart';
+import 'package:unicotantic/arsiv/profilAkis.dart';
 
 import '../Unic/doluAkis/doluAkisAppBar.dart';
+import '../Unic/doluAkis/doluYorumOku.dart';
 import '../Unic/fonksiyonlar/buildDefaultTextStyle.dart';
 import '../Unic/fonksiyonlar/kullaniciProfilUstBar.dart';
 import '../Unic/fonksiyonlar/negatifOyVer_pozitifOyVer.dart';
 import '../Unic/fonksiyonlar/postSabitleri.dart';
-import 'BenDrawer.dart';
-import 'ayarlar.dart';
-import 'profilAkis.dart';
+import '../profil/BenDrawer.dart';
+import 'profilYorumBolumu.dart';
+import '../profil/profil_fotograf_degistir.dart';
 
 ///////////////////////////////////
-class ProfilYorumBolumu extends StatefulWidget {
-  const ProfilYorumBolumu({super.key});
+class ProfilBilgilerim extends StatefulWidget {
+  const ProfilBilgilerim({super.key});
 
   @override
-  State<ProfilYorumBolumu> createState() => _ProfilYorumBolumuState();
+  State<ProfilBilgilerim> createState() => _ProfilBilgilerimState();
 }
 
-class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
+class _ProfilBilgilerimState extends State<ProfilBilgilerim> {
   final kullanici = FirebaseAuth.instance.currentUser!;
   final _firestore = FirebaseFirestore.instance;
   late File yuklenecekDosya = 'assets/images/icon/icon256.png' as File;
   ProfilFotografiDegistir getir = const ProfilFotografiDegistir();
   String? indirmeBaglantisi;
+  bool postlar = true;
 
   final getbox = GetStorage();
   GetStorage box = GetStorage();
-  final puanSa = Hive.box('unicotantic');
+  dynamic puanSa = Hive.box('unicotantic');
   String galeri = '';
   bool kapat = true;
+
+  Future<dynamic> unicCikar() async {
+    CollectionReference kullanicilar = _firestore.collection('Kullanicilar');
+    var icerik = kullanicilar.doc(kullanici.email);
+    var secim = await icerik.get();
+    dynamic map = secim.data();
+
+    dynamic unic = map['unic'];
+
+    await FirebaseFirestore.instance
+        .collection("Kullanicilar")
+        .doc(kullanici.email)
+        .update(unic >= 1 ? {"unic": FieldValue.increment(-1)} : {"unic": 0});
+    return unic;
+  }
+
+  galeridenYukle() async {
+    // ignore: deprecated_member_use
+    var alinanDosya = await ImagePicker().pickImage(source: ImageSource.gallery);
+    setState(() {
+      yuklenecekDosya = File(alinanDosya!.path);
+    });
+
+    Reference referansYol = FirebaseStorage.instance
+        .ref()
+        .child('profilresimleri')
+        .child(kullanici.email.toString())
+        .child('${DateTime.now().minute}profilResmi.png');
+    UploadTask yuklemeGorevi = referansYol.putFile(yuklenecekDosya);
+    String url = await (await yuklemeGorevi).ref.getDownloadURL();
+    setState(() {
+      indirmeBaglantisi = url;
+      getbox.write('profilresmilinki', indirmeBaglantisi.toString());
+
+      FirebaseFirestore.instance.collection('Kullanicilar').doc(kullanici.email.toString()).update({
+        'profilresmilinki': indirmeBaglantisi.toString(),
+      });
+
+      FirebaseFirestore.instance.collection('Yazilar').doc(kullanici.email.toString()).update({
+        'profilresmilinki': indirmeBaglantisi.toString(),
+      });
+    });
+  }
 
   @override
   void initState() {
@@ -53,7 +100,8 @@ class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
     CollectionReference kullanicilar = _firestore.collection('Kullanicilar');
     var kullaniciBilgileriSorgu = kullanicilar.doc(kullanici.email);
 
-    Query postaYorumSorgu = _firestore.collection('postaYorum').orderBy("zaman", descending: true);
+    Query postlarSorgu =
+        _firestore.collection('postlar').where('email', isEqualTo: kullanici.email).orderBy("zaman", descending: true);
 
     return SafeArea(
       child: Scaffold(
@@ -79,10 +127,10 @@ class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
                                 Expanded(
                                   child: GestureDetector(
                                     onTap: () {
-                                      Get.to(ProfilBilgilerim());
+                                      //Get.to(BireyselAkis());
                                     },
                                     child: Card(
-                                      color: Colors.black38,
+                                      color: Colors.cyan,
                                       child: Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: Text(
@@ -90,8 +138,8 @@ class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
                                           style: TextStyle(
                                               fontFamily: 'Avenir',
                                               fontSize: 14,
-                                              color: Colors.white70,
-                                              fontWeight: FontWeight.normal),
+                                              color: Colors.black87,
+                                              fontWeight: FontWeight.bold),
                                           textAlign: TextAlign.center,
                                         ),
                                       ),
@@ -101,10 +149,10 @@ class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
                                 Expanded(
                                   child: GestureDetector(
                                     onTap: () {
-                                      //Get.to(BireyselAkis());
+                                      Get.to(ProfilYorumBolumu());
                                     },
                                     child: Card(
-                                      color: Colors.cyan,
+                                      color: Colors.black38,
                                       child: Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: Text(
@@ -112,8 +160,8 @@ class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
                                           style: TextStyle(
                                               fontFamily: 'Avenir',
                                               fontSize: 14,
-                                              color: Colors.black87,
-                                              fontWeight: FontWeight.bold),
+                                              color: Colors.white70,
+                                              fontWeight: FontWeight.normal),
                                           textAlign: TextAlign.center,
                                         ),
                                       ),
@@ -214,7 +262,7 @@ class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
                                               blurRadius: 10),
                                         ]),
                                     // isim.toString() + ' ' + soyisim.toString(),
-                                    'Yorumlar',
+                                    'Postlar',
                                     textAlign: TextAlign.center),
                               ),
                             ),
@@ -223,10 +271,10 @@ class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
                       ],
                     ),
               StreamBuilder<QuerySnapshot>(
-                  stream: postaYorumSorgu.snapshots(),
+                  stream: postlarSorgu.snapshots(),
                   builder: (BuildContext context, AsyncSnapshot asyncSnapshot) {
                     if (asyncSnapshot.hasError) {
-                      return const Center(child: Text('Bir hata oluştu tekrnnar deneyin..'));
+                      return const Center(child: Text('Bir hata oluştu tekrar deneyin..'));
                     } else {
                       if (asyncSnapshot.hasData) {
                         List<DocumentSnapshot> listOfDocumentSnap = asyncSnapshot.data.docs;
@@ -237,10 +285,8 @@ class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
                               itemBuilder: (context, index) {
                                 var begenKontrol = listOfDocumentSnap[index].get('begen');
                                 var email = listOfDocumentSnap[index].get('email');
-                                //var id = listOfDocumentSnap[index].get('id');
                                 var tarih = listOfDocumentSnap[index].get('tarih');
-                                var baslik = listOfDocumentSnap[index].get('metin');
-                                var duzenlemeMetin = listOfDocumentSnap[index].get('baslik');
+                                var baslik = listOfDocumentSnap[index].get('baslik');
                                 var begenMeKontrol = listOfDocumentSnap[index].get('begenMe');
                                 var videoFoto = listOfDocumentSnap[index].get('postVideoLinki');
                                 var yorumSayisi = listOfDocumentSnap[index].get('yorumSayisi');
@@ -251,7 +297,7 @@ class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
                                 var bakBegenMeKontrol = begenMeKontrol.contains(kullanici.email);
 
                                 return Container(
-                                  child: kullanici.email.toString() == email.toString()
+                                  child: email.toString() == kullanici.email.toString()
                                       ? Card(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,7 +311,7 @@ class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
                                                 height: 35,
                                                 child: Row(
                                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                                                   children: [
                                                     Row(
                                                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -316,9 +362,6 @@ class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
                                                       children: [
                                                         IconButton(
                                                             onPressed: () async {
-                                                              // puanSa.put('postAydi', postAydi.toString());
-                                                              // puanSa.put('email', email.toString());
-                                                              print(postAydi.toString());
                                                               Get.to(DoluYorumOku(
                                                                 gelenKullaniciEmail: email.toString(),
                                                                 postAydi: postAydi.toString(),
@@ -359,13 +402,8 @@ class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
     );
   }
 
-  ///
-
-  ///
-
-  ///
-
-  Future<void> engelleFonksiyonu(email) async {
+  Future<dynamic> unicCikart() async {
+    final kullanici = FirebaseAuth.instance.currentUser!;
     final _firestore = FirebaseFirestore.instance;
     CollectionReference kullanicilar = _firestore.collection('Kullanicilar');
     var icerik = kullanicilar.doc(kullanici.email);
@@ -373,32 +411,14 @@ class _ProfilYorumBolumuState extends State<ProfilYorumBolumu> {
     dynamic map = secim.data();
 
     dynamic unic = map['unic'];
-    dynamic engelledim = map['engelledim'];
-    unicCikar();
 
-    if (unic <= 0) {
-    } else {
-      if (email != kullanici.email) {
-        if (engelledim.contains(email)) {
-          await FirebaseFirestore.instance.collection("Kullanicilar").doc(kullanici.email).update({
-            'engelledim': FieldValue.arrayRemove([email.toString()])
-          }).whenComplete(() {
-            print('kullanıcı engellendi');
-          });
-          await FirebaseFirestore.instance.collection("Kullanicilar").doc(email.toString()).update({
-            "engelleyenler": FieldValue.arrayRemove([kullanici.email.toString()])
-          });
-        } else {
-          await FirebaseFirestore.instance.collection("Kullanicilar").doc(kullanici.email).update({
-            'engelledim': FieldValue.arrayUnion([email.toString()])
-          }).whenComplete(() {
-            print('kullanıcı engellendi');
-          });
-          await FirebaseFirestore.instance.collection("Kullanicilar").doc(email.toString()).update({
-            "engelleyenler": FieldValue.arrayUnion([kullanici.email.toString()])
-          });
-        }
-      }
-    }
+    await FirebaseFirestore.instance
+        .collection("Kullanicilar")
+        .doc(kullanici.email)
+        .update(unic >= 1 ? {"unic": FieldValue.increment(-1)} : {"unic": 0});
+    return unic;
   }
+
+  ///
 }
+*/

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:grock/grock.dart';
+import 'package:hive_flutter/adapters.dart';
 
 import 'my_button.dart';
 import 'sifremi_unuttum.dart';
@@ -50,7 +50,7 @@ class _EmailGirisState extends State<EmailGiris> {
     } on FirebaseAuthException catch (error) {
       debugPrint("FirebaseAuthException: ${error.code} - ${error.message}");
       Get.back(); // Loading dialogu kapat
-      
+
       String message = 'Bir hata oluştu.';
       if (error.code == 'user-not-found') {
         message = 'Bu e-posta için kullanıcı bulunamadı.';
@@ -90,7 +90,7 @@ class _EmailGirisState extends State<EmailGiris> {
       final GoogleSignIn googleSignIn = GoogleSignIn(
         clientId: '1001866780856-59h73p7at795igq9lliu7ajdsloe5m6q.apps.googleusercontent.com',
       );
-      
+
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         debugPrint("Google Sign-In cancelled by user.");
@@ -153,9 +153,7 @@ class _EmailGirisState extends State<EmailGiris> {
             child: Container(
               constraints: const BoxConstraints.expand(),
               decoration: const BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage("assets/images/gif/lemat.gif"),
-                    fit: BoxFit.cover),
+                image: DecorationImage(image: AssetImage("assets/images/gif/lemat.gif"), fit: BoxFit.cover),
               ),
               child: SafeArea(
                 child: Center(
@@ -189,16 +187,14 @@ class _EmailGirisState extends State<EmailGiris> {
 
                         // username textfield
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 30),
+                          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 30),
                           child: Card(
                             color: Colors.black54,
                             child: TextFormField(
                               controller: _usernameController,
                               obscureText: false,
                               validator: validateEmail,
-                              style: const TextStyle(
-                                  color: Colors.cyanAccent, fontSize: 16),
+                              style: const TextStyle(color: Colors.cyanAccent, fontSize: 16),
                               decoration: InputDecoration(
                                 focusColor: Colors.black54,
                                 //add prefix icon
@@ -213,8 +209,7 @@ class _EmailGirisState extends State<EmailGiris> {
                                 ),
 
                                 focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                      color: Colors.cyanAccent, width: 1.0),
+                                  borderSide: const BorderSide(color: Colors.cyanAccent, width: 1.0),
                                   borderRadius: BorderRadius.circular(10.0),
                                 ),
                                 fillColor: Colors.black54,
@@ -249,16 +244,14 @@ class _EmailGirisState extends State<EmailGiris> {
 
                         // password textfield
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 30),
+                          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 30),
                           child: Card(
                             color: Colors.black54,
                             child: TextFormField(
                               controller: _passwordController,
                               obscureText: true,
                               validator: validatePassword,
-                              style: const TextStyle(
-                                  color: Colors.cyanAccent, fontSize: 16),
+                              style: const TextStyle(color: Colors.cyanAccent, fontSize: 16),
                               decoration: InputDecoration(
                                 focusColor: Colors.black54,
                                 //add prefix icon
@@ -273,8 +266,7 @@ class _EmailGirisState extends State<EmailGiris> {
                                 ),
 
                                 focusedBorder: OutlineInputBorder(
-                                  borderSide: const BorderSide(
-                                      color: Colors.cyanAccent, width: 1.0),
+                                  borderSide: const BorderSide(color: Colors.cyanAccent, width: 1.0),
                                   borderRadius: BorderRadius.circular(10.0),
                                 ),
                                 fillColor: Colors.black54,
@@ -317,10 +309,7 @@ class _EmailGirisState extends State<EmailGiris> {
                                 padding: EdgeInsets.all(18.0),
                                 child: Text(
                                   'Kayıt Ol',
-                                  style: TextStyle(
-                                      color: Colors.cyanAccent,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: Colors.cyanAccent, fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
@@ -335,10 +324,7 @@ class _EmailGirisState extends State<EmailGiris> {
                                 padding: EdgeInsets.all(18.0),
                                 child: Text(
                                   'Şifremi Unuttum',
-                                  style: TextStyle(
-                                      color: Colors.cyanAccent,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
+                                  style: TextStyle(color: Colors.cyanAccent, fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ),
@@ -363,11 +349,10 @@ class _EmailGirisState extends State<EmailGiris> {
                             child: Container(
                               height: 55,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white30,
                                 borderRadius: BorderRadius.circular(10),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
                                     blurRadius: 10,
                                     offset: const Offset(0, 5),
                                   ),
@@ -386,7 +371,7 @@ class _EmailGirisState extends State<EmailGiris> {
                                     style: GoogleFonts.inter(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
+                                      color: Colors.white70,
                                     ),
                                   ),
                                 ],
@@ -431,15 +416,13 @@ String? validateEmail(String? formEmail) {
   }
   String pattern = r'\w+@\w+\.\w+';
   RegExp regex = RegExp(pattern);
-  if (!regex.hasMatch(formEmail))
-    return '''Email adresini bi kontrol eder misin canım.''';
+  if (!regex.hasMatch(formEmail)) return '''Email adresini bi kontrol eder misin canım.''';
 
   return null;
 }
 
 String? validatePassword(String? formPassword) {
-  if (formPassword == null || formPassword.isEmpty)
-    return 'Sence şifresiz olur mu?';
+  if (formPassword == null || formPassword.isEmpty) return 'Sence şifresiz olur mu?';
 
   String pattern = r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$';
 

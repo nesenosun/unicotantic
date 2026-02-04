@@ -11,9 +11,17 @@ import 'package:grock/grock.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
+import 'core/voice/voice_controller.dart';
+import 'core/voice/commands/system_optimization_command.dart';
+import 'core/voice/commands/navigate_command.dart';
+
 import 'Unic/fonksiyonlar/serviceDart.dart';
 import 'Unic/fonksiyonlar/translate_getx.dart';
 import 'login/splash.dart';
+// Sayfa Importları
+import 'akis/feed.dart'; 
+import 'Unic/yapayZeka/unica_chat_page.dart';
+
 import 'Unic/zaman/zamanBildirimi.dart';
 import 'firebase_options.dart';
 import 'login/auth_kontrol.dart';
@@ -68,6 +76,13 @@ Future<void> main() async {
   tz.initializeTimeZones();
   await GetStorage.init();
 
+  // Akış: Voice Controller Başlatılması
+  final voiceController = Get.put(VoiceController());
+  voiceController.registerCommand(SystemOptimizationCommand());
+  voiceController.registerCommand(NavigateCommand());
+  print("🎤 Akış VoiceController başlatıldı ve komutlar kaydedildi.");
+
+
   runApp(
     ValueListenableBuilder(
       valueListenable: Hive.box(
@@ -94,6 +109,8 @@ Future<void> main() async {
           home: Splash(),
           getPages: [
             GetPage(name: '/AuthKontrol', page: () => const AuthKontrol()),
+            GetPage(name: '/feed', page: () => const FeedSayfasi()), // Akış
+            GetPage(name: '/unica', page: () => const UnicaChatPage()), // Unica AI
           ],
         );
       },
