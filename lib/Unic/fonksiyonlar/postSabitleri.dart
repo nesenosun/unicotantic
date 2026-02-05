@@ -5,10 +5,9 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pinch_zoom/pinch_zoom.dart';
 import 'package:unicotantic/Unic/fonksiyonlar/videoPlayrFlick.dart';
-import 'package:unicotantic/profil/postaYorumOku.dart';
+import 'package:unicotantic/akis/post_ayrintilari.dart';
 import 'package:unicotantic/profil/yeniZiyaretciProfil.dart';
 
-import '../doluAkis/doluYorumOku.dart';
 import 'altButonlar.dart';
 import 'negatifOyVer_pozitifOyVer.dart';
 import 'profilResmiGetir.dart';
@@ -413,9 +412,8 @@ SizedBox DorduncuBolumAltBar(
                 // puanSa.put('email', email.toString());
                 print(postAydi.toString());
                 Get.to(
-                  DoluYorumOku(
-                    gelenKullaniciEmail: email.toString(),
-                    postAydi: postAydi.toString(),
+                  PostAyrintilari(
+                    postID: postAydi,
                   ),
                 );
               },
@@ -518,9 +516,8 @@ SizedBox DorduncuBolumAltBarPostaYorum(
                 // puanSa.put('email', email.toString());
                 print(postAydi.toString());
                 Get.to(
-                  PostaYorumOku(
-                    gelenKullaniciEmail: kullanici.email.toString(),
-                    postAydi: postAydi.toString(),
+                  PostAyrintilari(
+                    postID: postAydi,
                   ),
                 );
               },

@@ -12,7 +12,6 @@ import '../akis/feed_video_player.dart';
 import '../akis/post_ayrintilari.dart';
 import '../core/voice/widgets/voice_bottom_bar.dart';
 import '../profil/BenDrawer.dart';
-import '../profil/baskaAkisaMetinGirYeni.dart';
 import 'full_screen_image_viewer.dart';
 import 'full_screen_video_player.dart';
 
@@ -235,8 +234,6 @@ class _YeniZiyaretciProfilState extends State<YeniZiyaretciProfil> {
                                 ],
                               ),
                       ),
-                      if (!engelledim && arkadaslarIcindemi)
-                        BaskaAkisaMetinGirYeni(gelenKullaniciEmail: widget.gelenKullaniciEmail),
                     ],
                   );
                 },

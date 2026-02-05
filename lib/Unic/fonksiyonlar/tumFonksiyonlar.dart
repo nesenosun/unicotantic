@@ -8,27 +8,39 @@ Future<void> engelleFonksiyonu(email) async {
   CollectionReference kullanicilar = _firestore.collection('Kullanicilar');
   var icerik = kullanicilar.doc(kullanici.email);
   var secim = await icerik.get();
-  dynamic map = secim.data();
+  Map<String, dynamic>? data = secim.data() as Map<String, dynamic>?;
 
-  dynamic unic = map['unic'];
-  dynamic engelledim = map['engelledim'];
+  num unic = data?['unic'] ?? 0;
+  List engelledim = data?['engelledim'] ?? [];
   unicCikar();
 
-  if (unic <= 0) {
+  if (unic.toInt() <= 0) {
   } else {
     if (email != kullanici.email) {
       if (engelledim.contains(email)) {
-        await FirebaseFirestore.instance.collection("Kullanicilar").doc(kullanici.email).update({
+        await FirebaseFirestore.instance
+            .collection("Kullanicilar")
+            .doc(kullanici.email)
+            .update({
           'engelledim': FieldValue.arrayRemove([email.toString()])
         }).whenComplete(() {});
-        await FirebaseFirestore.instance.collection("Kullanicilar").doc(email.toString()).update({
+        await FirebaseFirestore.instance
+            .collection("Kullanicilar")
+            .doc(email.toString())
+            .update({
           "engelleyenler": FieldValue.arrayRemove([kullanici.email.toString()])
         });
       } else {
-        await FirebaseFirestore.instance.collection("Kullanicilar").doc(kullanici.email).update({
+        await FirebaseFirestore.instance
+            .collection("Kullanicilar")
+            .doc(kullanici.email)
+            .update({
           'engelledim': FieldValue.arrayUnion([email.toString()])
         }).whenComplete(() {});
-        await FirebaseFirestore.instance.collection("Kullanicilar").doc(email.toString()).update({
+        await FirebaseFirestore.instance
+            .collection("Kullanicilar")
+            .doc(email.toString())
+            .update({
           "engelleyenler": FieldValue.arrayUnion([kullanici.email.toString()])
         });
       }

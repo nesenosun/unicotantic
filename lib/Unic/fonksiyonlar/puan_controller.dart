@@ -15,11 +15,11 @@ class PuanC extends GetxController {
     CollectionReference kullanicilar = _firestore.collection('Kullanicilar');
     var icerik = kullanicilar.doc(kullanici.email);
     var secim = await icerik.get();
-    dynamic map = secim.data();
+    Map<String, dynamic>? data = secim.data() as Map<String, dynamic>?;
 
-    dynamic unic = map['unic'];
+    num unic = data?['unic'] ?? 0;
 
-    return unic;
+    return unic.toInt();
   }
 
   Future<int> yorumSayisi() async {
@@ -41,30 +41,30 @@ class PuanC extends GetxController {
     CollectionReference kullanicilar = _firestore.collection('Kullanicilar');
     var icerik = kullanicilar.doc(kullanici.email);
     var secim = await icerik.get();
-    dynamic map = secim.data();
+    Map<String, dynamic>? data = secim.data() as Map<String, dynamic>?;
 
-    dynamic unic = map['unic'];
+    num unic = data?['unic'] ?? 0;
 
     await FirebaseFirestore.instance
         .collection("Kullanicilar")
         .doc(kullanici.email)
         .update({'unic': FieldValue.increment(10)});
-    return unic;
+    return unic.toInt();
   }
 
   Future<dynamic> unicCikar() async {
     CollectionReference kullanicilar = _firestore.collection('Kullanicilar');
     var icerik = kullanicilar.doc(kullanici.email);
     var secim = await icerik.get();
-    dynamic map = secim.data();
+    Map<String, dynamic>? data = secim.data() as Map<String, dynamic>?;
 
-    dynamic unic = map['unic'];
+    num unic = data?['unic'] ?? 0;
 
     await FirebaseFirestore.instance
         .collection("Kullanicilar")
         .doc(kullanici.email)
         .update(unic >= 1 ? {"unic": FieldValue.increment(-1)} : {"unic": 0});
-    return unic;
+    return unic.toInt();
   }
 
   RxInt gizle = 0.obs;
@@ -109,8 +109,10 @@ class PuanC extends GetxController {
     puanSa.put('kullanici', kullanici.email.toString());
     puanSa.put('olumsaati', 72);
 
-    DocumentSnapshot snapshot =
-        await FirebaseFirestore.instance.collection("Kullanicilar").doc(FirebaseAuth.instance.currentUser!.email).get();
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection("Kullanicilar")
+        .doc(FirebaseAuth.instance.currentUser!.email)
+        .get();
     if (snapshot.exists) {
       //documentId already exists
     } else {
@@ -132,7 +134,8 @@ class PuanC extends GetxController {
         'iletisim': '',
         'unic': '',
         'metin': '',
-        'profilresmilinki': FirebaseAuth.instance.currentUser!.photoURL.toString(),
+        'profilresmilinki':
+            FirebaseAuth.instance.currentUser!.photoURL.toString(),
       });
     }
   }

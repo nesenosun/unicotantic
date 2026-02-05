@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:unicotantic/Unic/bildirimler/bildirim.dart';
 import 'package:unicotantic/Unic/fonksiyonlar/buildDefaultTextStyle.dart';
 import 'package:unicotantic/Unic/fonksiyonlar/reklamAnasayfa.dart';
 import 'package:unicotantic/Unic/fonksiyonlar/reklamGoster.dart';
@@ -31,7 +30,6 @@ AppBar akisAppBar() {
       // unicaAIGit(), // REMOVED - Now in bottom bar
       unicSayisalGosterim(icerik),
       ikinciBolumUnicYazisi(),
-      bildirimGosterim(icerik),
     ],
     backgroundColor: Colors.transparent,
     elevation: 0,
@@ -171,7 +169,7 @@ Expanded bildirimGosterim(DocumentReference<Object?> icerik) {
 
         dynamic bildirim = map['bildirim'];
 
-        Get.to(Bildirim());
+        //Get.to(Bildirim());
         icerik.update({'bildirim': 0});
       },
       child: Card(

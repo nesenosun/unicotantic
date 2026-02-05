@@ -3,15 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:unicotantic/Unic/doluAkis/doluAkisAppBar.dart';
-import 'package:unicotantic/Unic/doluAkis/yeniAkis.dart';
 import 'package:unicotantic/Unic/fonksiyonlar/buildDefaultTextStyle.dart';
 import 'package:unicotantic/Unic/veriTabani/veriTabaniYonetimPaneli.dart';
-import 'package:unicotantic/login/email_giris.dart';
-import 'package:unicotantic/login/sifremi_unuttum.dart';
-import 'package:unicotantic/login/uyeYap.dart';
+import 'package:unicotantic/login/google_giris.dart';
 import 'package:unicotantic/profil/admin_sayfasi.dart';
 import 'package:unicotantic/profil/profil_duzenle.dart';
 
@@ -37,7 +33,6 @@ class _AyarlarState extends State<Ayarlar> {
   Widget build(BuildContext context) {
     CollectionReference kullanicilar = _firestore.collection('Kullanicilar');
     var kullaniciBilgileriSorgu = kullanicilar.doc(kullanici.email);
-    var icerik = kullanicilar.doc(kullanici.email);
 
     return Scaffold(
       appBar: akisAppBar(),
@@ -113,7 +108,7 @@ class _AyarlarState extends State<Ayarlar> {
                                           Get.to(const AdminSayfasi());
                                         },
                                         child: Card(
-                                          color: Colors.red.withOpacity(0.2),
+                                          color: Colors.red.withAlpha(51),
                                           elevation: 10,
                                           margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 50),
                                           child: const Row(
@@ -155,19 +150,13 @@ class _AyarlarState extends State<Ayarlar> {
                           GestureDetector(
                             onTap: () async {
                               //SystemNavigator.pop();
-                              Get.off(const EmailGiris());
+                              Get.off(const EmailGiris.GoogleGiris());
 
                               try {
                                 await FirebaseAuth.instance.signOut();
                                 errorMessage = '';
                               } on FirebaseAuthException catch (error) {
                                 errorMessage = error.message!;
-                              }
-                              try {
-                                await GoogleSignIn().signOut();
-                                errorMessage = '';
-                              } catch (e) {
-                                errorMessage = errorMessage;
                               }
 
                               setState(() {});
@@ -321,49 +310,6 @@ class _AyarlarState extends State<Ayarlar> {
                           ),
                           GestureDetector(
                             onTap: () async {
-                              Get.to(SifremiUnuttum());
-
-                              setState(() {});
-                            },
-                            child: const Card(
-                              color: Colors.white10,
-                              elevation: 10,
-                              margin: EdgeInsets.symmetric(vertical: 5, horizontal: 50),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(15.0),
-                                      child: Text(
-                                        'Şifre Değiştir',
-                                        style: TextStyle(
-                                          color: Colors.white70,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Avenir',
-                                          fontSize: 16,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ),
-                                  Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 3, vertical: 3),
-                                      child: Icon(
-                                        Icons.settings,
-                                        size: 20,
-                                        color: Colors.white70,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () async {
                               //SystemNavigator.pop();
                               Get.to(Arkadaslar(
                                 gelenKullaniciEmail: kullanici.email.toString(),
@@ -432,60 +378,6 @@ class _AyarlarState extends State<Ayarlar> {
                                   padding: EdgeInsets.all(15.0),
                                   child: Text(
                                     'Oyun',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Avenir',
-                                      fontSize: 16,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () async {
-                              Get.to(UyeYap());
-
-                              setState(() {});
-                            },
-                            child: const Card(
-                              color: Colors.white10,
-                              elevation: 10,
-                              margin: EdgeInsets.symmetric(vertical: 5, horizontal: 50),
-                              child: Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(15.0),
-                                  child: Text(
-                                    'Uye Ekle',
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'Avenir',
-                                      fontSize: 16,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () async {
-                              Get.to(YeniAkis(gelenKullaniciEmail: kullanici.email.toString()));
-
-                              setState(() {});
-                            },
-                            child: const Card(
-                              color: Colors.white10,
-                              elevation: 10,
-                              margin: EdgeInsets.symmetric(vertical: 5, horizontal: 50),
-                              child: Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(15.0),
-                                  child: Text(
-                                    'Yeni Akış',
                                     style: TextStyle(
                                       color: Colors.white70,
                                       fontWeight: FontWeight.bold,

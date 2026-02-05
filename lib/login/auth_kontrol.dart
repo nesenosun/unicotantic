@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:unicotantic/login/email_giris.dart';
+import 'package:unicotantic/login/google_giris.dart';
 
 import '../akis/anasayfa.dart';
 
@@ -28,7 +28,7 @@ class _AuthKontrolState extends State<AuthKontrol> {
           if (snapshot.hasData) {
             return const DoluAkisAnaSayfa();
           } else {
-            return const EmailGiris();
+            return const EmailGiris.GoogleGiris();
           }
         },
       ),

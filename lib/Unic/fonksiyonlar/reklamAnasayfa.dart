@@ -4,10 +4,9 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:unicotantic/profil/bosBenDrawer.dart';
-import 'package:unicotantic/profil/BenDrawer.dart';
 import 'package:unicotantic/Unic/doluAkis/bosBuildAppBar.dart';
 import 'package:unicotantic/Unic/fonksiyonlar/haber01.dart';
+import 'package:unicotantic/profil/BenDrawer.dart';
 
 class ReklamAnaSayfa extends StatefulWidget {
   const ReklamAnaSayfa({super.key});
@@ -22,8 +21,7 @@ class _ReklamAnaSayfaState extends State<ReklamAnaSayfa> {
   final puanSa = Hive.box('unicotantic');
 
   Future<void> saveTokenToFirestore() async {
-    final String? token =
-        await getTokenFromSomewhere(); // Burada cihazdan tokenı alma kodunu çağırman gerekiyor
+    final String? token = await getTokenFromSomewhere(); // Burada cihazdan tokenı alma kodunu çağırman gerekiyor
     if (token != null) {
       await FirebaseFirestore.instance
           .collection('uyeOlmayanToken')
@@ -59,9 +57,7 @@ class _ReklamAnaSayfaState extends State<ReklamAnaSayfa> {
 
   @override
   Widget build(BuildContext context) {
-    print('uygulamaSurumu: ' +
-        puanSa.get('uygulamaSurumu',
-            defaultValue: 'uygulama surumu yuklenmedi'));
+    print('uygulamaSurumu: ' + puanSa.get('uygulamaSurumu', defaultValue: 'uygulama surumu yuklenmedi'));
     return puanSa.get('uygulamaSurumu') == 'bir'
         ? SafeArea(
             child: Scaffold(
@@ -71,7 +67,7 @@ class _ReklamAnaSayfaState extends State<ReklamAnaSayfa> {
                   if (snapshot.hasData) {
                     return const BenDrawer();
                   } else {
-                    return const bosBenDrawer();
+                    return const Center();
                   }
                 },
               ),
@@ -99,9 +95,7 @@ class _ReklamAnaSayfaState extends State<ReklamAnaSayfa> {
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
-                  ElevatedButton(
-                      onPressed: () => Get.to(const ReklamAnaSayfa()),
-                      child: Text('Anasayfa'))
+                  ElevatedButton(onPressed: () => Get.to(const ReklamAnaSayfa()), child: Text('Anasayfa'))
                 ],
               )),
             ),

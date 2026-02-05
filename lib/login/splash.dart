@@ -2,8 +2,8 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:unicotantic/login/email_giris.dart';
 import 'package:unicotantic/akis/anasayfa.dart';
+import 'package:unicotantic/login/google_giris.dart';
 
 class Splash extends StatefulWidget {
   const Splash({Key? key}) : super(key: key);
@@ -34,7 +34,7 @@ class _SplashState extends State<Splash> {
               if (snapshot.hasData) {
                 return const DoluAkisAnaSayfa();
               } else {
-                return const EmailGiris();
+                return const EmailGiris.GoogleGiris();
               }
             },
           ),

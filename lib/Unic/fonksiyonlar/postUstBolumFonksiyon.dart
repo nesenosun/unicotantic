@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:unicotantic/profil/yeniZiyaretciProfil.dart';
 
-import '../duzenlemeler/duzenlemeleriGor.dart';
-import '../duzenlemeler/postuDuzenle.dart';
 import 'altButonlar.dart';
 
 Card postUstBolumFonksiyon(
@@ -87,7 +85,6 @@ Card postUstBolumFonksiyon(
                     onTap: () {
                       puanSa.put('postAydi', postAydi.toString());
                       puanSa.put('email', email.toString());
-                      Get.to(DuzenlemeleriGor());
                     },
                     child: Text(tarih.toString() + '  düzenlendi ',
                         textAlign: TextAlign.center,
@@ -105,8 +102,6 @@ Card postUstBolumFonksiyon(
                     onPressed: () async {
                       puanSa.put('postAydi', postAydi.toString());
                       puanSa.put('email', email.toString());
-
-                      Get.to(PostuDuzenle());
                     },
                     icon: const Icon(
                       Icons.edit,

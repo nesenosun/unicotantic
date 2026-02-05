@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:unicotantic/akis/post_ayrintilari.dart';
 
-import '../doluAkis/doluYorumOku.dart';
 import 'negatifOyVer_pozitifOyVer.dart';
 
 final kullanici = FirebaseAuth.instance.currentUser!;
@@ -95,9 +95,8 @@ SizedBox altButonlar(
                     puanSa.put('postAydi', postAydi.toString());
                     puanSa.put('email', email.toString());
                     print(postAydi.toString());
-                    Get.to(DoluYorumOku(
-                      gelenKullaniciEmail: email.toString(),
-                      postAydi: postAydi.toString(),
+                    Get.to(PostAyrintilari(
+                      postID: postAydi,
                     ));
                   },
                   icon: Icon(

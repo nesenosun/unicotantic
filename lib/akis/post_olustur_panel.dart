@@ -13,7 +13,8 @@ class PostOlusturPanel extends StatefulWidget {
   final String? parentID;
   final String? rootID;
 
-  const PostOlusturPanel({Key? key, this.parentID, this.rootID}) : super(key: key);
+  const PostOlusturPanel({Key? key, this.parentID, this.rootID})
+      : super(key: key);
 
   @override
   State<PostOlusturPanel> createState() => _PostOlusturPanelState();
@@ -30,15 +31,21 @@ class _PostOlusturPanelState extends State<PostOlusturPanel> {
   String? _statusText;
 
   // Medya yükleme fonksiyonu (Genel)
-  Future<void> _uploadMedia(XFile pickedFile, String folder, String type) async {
+  Future<void> _uploadMedia(
+      XFile pickedFile, String folder, String type) async {
     setState(() {
       _isUploading = true;
       _statusText = 'Medya yükleniyor...';
     });
 
     try {
-      String fileName = '${DateTime.now().microsecondsSinceEpoch}_${type == 'video' ? 'post.mp4' : 'post.jpg'}';
-      Reference ref = FirebaseStorage.instance.ref().child(folder).child(kullanici.email!).child(fileName);
+      String fileName =
+          '${DateTime.now().microsecondsSinceEpoch}_${type == 'video' ? 'post.mp4' : 'post.jpg'}';
+      Reference ref = FirebaseStorage.instance
+          .ref()
+          .child(folder)
+          .child(kullanici.email!)
+          .child(fileName);
 
       UploadTask task;
       if (kIsWeb) {
@@ -80,15 +87,18 @@ class _PostOlusturPanelState extends State<PostOlusturPanel> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+    final pickedFile =
+        await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
     if (pickedFile != null) {
-      await _uploadMedia(pickedFile, 'postFotoları', 'image'); // Orijinal klasör adınız 'postFotoları' olabilir
+      await _uploadMedia(pickedFile, 'postFotoları',
+          'image'); // Orijinal klasör adınız 'postFotoları' olabilir
     }
   }
 
   Future<void> _pickVideo() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickVideo(source: ImageSource.gallery, maxDuration: const Duration(seconds: 60));
+    final pickedFile = await picker.pickVideo(
+        source: ImageSource.gallery, maxDuration: const Duration(seconds: 60));
     if (pickedFile != null) {
       await _uploadMedia(pickedFile, 'postVideolari', 'video');
     }
@@ -103,13 +113,48 @@ class _PostOlusturPanelState extends State<PostOlusturPanel> {
     setState(() => _isUploading = true);
 
     try {
-      // Unic Kontrolü
-      DocumentSnapshot userDoc = await _firestore.collection('Kullanicilar').doc(kullanici.email).get();
-      int unic = (userDoc.data() as Map<String, dynamic>?)?['unic'] ?? 0;
+      // Unic Kontrolü ve Otomatik Kayıt Giderme
+      DocumentSnapshot userDoc = await _firestore
+          .collection('Kullanicilar')
+          .doc(kullanici.email)
+          .get();
+
+      if (!userDoc.exists) {
+        // Eğer kullanıcı kaydı yoksa (Google girişi hatası vb.), otomatik oluştur
+        debugPrint(
+            'Kullanıcı kaydı bulunamadı, otomatik oluşturuluyor: ${kullanici.email}');
+        await _firestore.collection('Kullanicilar').doc(kullanici.email).set({
+          'email': kullanici.email,
+          'isim': kullanici.displayName ?? kullanici.email?.split('@')[0],
+          'id': kullanici.uid,
+          'uid': kullanici.uid,
+          'kayit tarihi': FieldValue.serverTimestamp(),
+          'unic': 100,
+          'postSayisi': 0,
+          'arkadaslar': [],
+          'engelledim': [],
+          'engelleyenler': [],
+          'begen': [],
+          'begenMe': [],
+          'profilresmilinki': kullanici.photoURL ?? '',
+          'profilGizli': false,
+          'hakkinda': 'Merhaba! Ben de buradayım.',
+        });
+        // Dokümanı tekrar çek
+        userDoc = await _firestore
+            .collection('Kullanicilar')
+            .doc(kullanici.email)
+            .get();
+      }
+
+      int unic = ((userDoc.data() as Map<String, dynamic>?)?['unic'] as num?)
+              ?.toInt() ??
+          0;
 
       if (unic <= 0) {
-        Get.snackbar('Hata', 'Yetersiz Unic puanı.');
-        setState(() => _isUploading = false);
+        Get.snackbar('Hata',
+            'Yetersiz Unic puanı. Paylaşım yapmak için en az 1 Unic puanınız olmalı.');
+        if (mounted) setState(() => _isUploading = false);
         return;
       }
 
@@ -119,13 +164,12 @@ class _PostOlusturPanelState extends State<PostOlusturPanel> {
 
       String postID = _firestore.collection('postlar').doc().id;
 
-      // Eski yapıya destek için model dışı alanları da ekliyoruz
       Map<String, dynamic> postData = {
         'postID': postID,
         'authorID': kullanici.uid,
         'email': kullanici.email,
         'text': _textController.text.trim(),
-        'createdAt': FieldValue.serverTimestamp(), // Yeni yapı
+        'createdAt': FieldValue.serverTimestamp(),
         'yorumSayisi': 0,
         'rootId': widget.rootID ?? postID,
         'parentID': widget.parentID,
@@ -135,20 +179,31 @@ class _PostOlusturPanelState extends State<PostOlusturPanel> {
         'like': 0,
         'dislike': 0,
       };
-      Get.back();
+
       await _firestore.collection('postlar').doc(postID).set(postData);
+
+      // İşlem başarılı olduktan sonra ekranı kapat
+      Get.back();
+      Get.snackbar('Başarılı', 'Postunuz paylaşıldı.');
     } catch (e) {
-      setState(() => _isUploading = false);
-      Get.snackbar('Hata', 'Paylaşım yapılamadı: $e');
+      debugPrint('Post Paylaşma Hatası Detayı: $e');
+      if (mounted) setState(() => _isUploading = false);
+      Get.snackbar('Hata', 'Paylaşım sırasında bir teknik sorun oluştu: $e',
+          duration: const Duration(seconds: 5));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, top: 20, left: 20, right: 20),
-      decoration:
-          const BoxDecoration(color: Color(0xFF15202B), borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          top: 20,
+          left: 20,
+          right: 20),
+      decoration: const BoxDecoration(
+          color: Color(0xFF15202B),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -156,21 +211,30 @@ class _PostOlusturPanelState extends State<PostOlusturPanel> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(icon: const Icon(Icons.close, color: Colors.white), onPressed: () => Get.back()),
+                IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () => Get.back()),
                 ElevatedButton(
                   onPressed: _isUploading ? null : _submitPost,
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan),
                   child: _isUploading
                       ? const SizedBox(
-                          width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text('Postla', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white))
+                      : const Text('Postla',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
             if (_statusText != null)
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(_statusText!, style: const TextStyle(color: Colors.cyan, fontSize: 12)),
+                child: Text(_statusText!,
+                    style: const TextStyle(color: Colors.cyan, fontSize: 12)),
               ),
             TextField(
               controller: _textController,
@@ -178,7 +242,9 @@ class _PostOlusturPanelState extends State<PostOlusturPanel> {
               maxLines: 4,
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
-                  hintText: 'Neler oluyor?', hintStyle: TextStyle(color: Colors.grey), border: InputBorder.none),
+                  hintText: 'Neler oluyor?',
+                  hintStyle: TextStyle(color: Colors.grey),
+                  border: InputBorder.none),
             ),
             if (_mediaUrl != null)
               Stack(
@@ -186,12 +252,17 @@ class _PostOlusturPanelState extends State<PostOlusturPanel> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(15),
                     child: _mediaType == 'image'
-                        ? Image.network(_mediaUrl!, height: 200, width: double.infinity, fit: BoxFit.cover)
+                        ? Image.network(_mediaUrl!,
+                            height: 200,
+                            width: double.infinity,
+                            fit: BoxFit.cover)
                         : Container(
                             height: 200,
                             width: double.infinity,
                             color: Colors.grey[800],
-                            child: const Center(child: Icon(Icons.videocam, color: Colors.white, size: 50))),
+                            child: const Center(
+                                child: Icon(Icons.videocam,
+                                    color: Colors.white, size: 50))),
                   ),
                   Positioned(
                     top: 5,
@@ -215,7 +286,8 @@ class _PostOlusturPanelState extends State<PostOlusturPanel> {
                     icon: const Icon(Icons.image_outlined, color: Colors.cyan),
                     onPressed: _isUploading ? null : _pickImage),
                 IconButton(
-                    icon: const Icon(Icons.videocam_outlined, color: Colors.cyan),
+                    icon:
+                        const Icon(Icons.videocam_outlined, color: Colors.cyan),
                     onPressed: _isUploading ? null : _pickVideo),
               ],
             ),

@@ -1,8 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:unicotantic/login/splash.dart';
 import 'package:unicotantic/models/post_model.dart';
+import 'package:unicotantic/profil/ayarlar.dart';
 
 import '../Unic/fonksiyonlar/buildDefaultTextStyle.dart';
 import '../Unic/fonksiyonlar/postSabitleri.dart';
@@ -207,13 +213,23 @@ class _KullaniciProfilSayfasiState extends State<KullaniciProfilSayfasi> {
                       ),
               ),
               const SizedBox(height: 12),
-              Text(
-                user.displayName ?? "Kullanıcı",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    user.displayName ?? "Kullanıcı",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        signOutFromApp();
+                      },
+                      child: SizedBox(height: 30, width: 30, child: Image.asset("assets/images/png/ayarlar.png"))),
+                ],
               ),
               Text(
                 "@${user.email?.split('@')[0]}",
@@ -231,16 +247,21 @@ class _KullaniciProfilSayfasiState extends State<KullaniciProfilSayfasi> {
                 ],
               ),
               const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.grey[900],
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey[800]!),
-                ),
-                child: const Text(
-                  "Profili Düzenle",
-                  style: TextStyle(color: Colors.white, fontSize: 13),
+              GestureDetector(
+                onTap: () {
+                  Get.to(Ayarlar());
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[900],
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey[800]!),
+                  ),
+                  child: const Text(
+                    "Profili Düzenle",
+                    style: TextStyle(color: Colors.white, fontSize: 13),
+                  ),
                 ),
               ),
             ],
@@ -396,6 +417,26 @@ class _KullaniciProfilSayfasiState extends State<KullaniciProfilSayfasi> {
         );
       },
     );
+  }
+
+  Future<void> signOutFromApp() async {
+    try {
+      // 1. Google oturumunu kapat (Hesap seçme ekranının tekrar gelmesi için)
+      final GoogleSignIn googleSignIn = GoogleSignIn.instance;
+      await googleSignIn.signOut();
+
+      // 2. Firebase oturumunu kapat
+      await FirebaseAuth.instance.signOut();
+
+      if (kDebugMode) {
+        Get.off(Splash());
+        print("Oturum başarıyla kapatıldı.");
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Çıkış yapılırken hata oluştu: $e");
+      }
+    }
   }
 }
 

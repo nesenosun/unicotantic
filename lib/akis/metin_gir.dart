@@ -47,7 +47,8 @@ class _MetinGirState extends State<MetinGir> {
       Get.snackbar('Kısıtlama', 'Video seçiliyken fotoğraf ekleyemezsiniz.');
       return;
     }
-    var alinan = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 40);
+    var alinan = await ImagePicker()
+        .pickImage(source: ImageSource.gallery, imageQuality: 40);
     if (alinan == null) return;
 
     File resimDosyasi = File(alinan.path);
@@ -89,8 +90,10 @@ class _MetinGirState extends State<MetinGir> {
     var dtNow = DateTime.now();
     var postID = _firestore.collection('postlar').doc().id;
 
-    var mediaUrl = getVideo.length > 5 ? getVideo : (getfoto != 'bos' ? getfoto : null);
-    var mediaType = getVideo.length > 5 ? 'video' : (getfoto != 'bos' ? 'image' : 'text');
+    var mediaUrl =
+        getVideo.length > 5 ? getVideo : (getfoto != 'bos' ? getfoto : null);
+    var mediaType =
+        getVideo.length > 5 ? 'video' : (getfoto != 'bos' ? 'image' : 'text');
 
     PostModel newPost = PostModel(
       postID: postID,
@@ -106,7 +109,10 @@ class _MetinGirState extends State<MetinGir> {
 
     var postData = newPost.toMap();
 
-    await FirebaseFirestore.instance.collection("postlar").doc(postID).set(postData);
+    await FirebaseFirestore.instance
+        .collection("postlar")
+        .doc(postID)
+        .set(postData);
   }
 
   Future<void> galeridenVideoYukle() async {
@@ -124,7 +130,8 @@ class _MetinGirState extends State<MetinGir> {
       galeri = 'Video işleniyor...';
     });
 
-    var compressVideoFilePath = await VideoCompress.compressVideo(alinan.path, quality: VideoQuality.LowQuality);
+    var compressVideoFilePath = await VideoCompress.compressVideo(alinan.path,
+        quality: VideoQuality.LowQuality);
     var compressVideoFilePathFile = compressVideoFilePath!.file;
     var getThumbnail = await VideoCompress.getFileThumbnail(alinan.path);
 
@@ -150,10 +157,12 @@ class _MetinGirState extends State<MetinGir> {
           .child('${dtNow}postFoto.jpg');
 
       UploadTask yuklemeGorevi = referansYol.putFile(compressVideoFilePathFile);
-      UploadTask yuklemeGoreviThumbnail = referansYolFoto.putFile(File(getThumbnail.path));
+      UploadTask yuklemeGoreviThumbnail =
+          referansYolFoto.putFile(File(getThumbnail.path));
 
       String url = await (await yuklemeGorevi).ref.getDownloadURL();
-      String urlyuklemeGoreviThumbnail = await (await yuklemeGoreviThumbnail).ref.getDownloadURL();
+      String urlyuklemeGoreviThumbnail =
+          await (await yuklemeGoreviThumbnail).ref.getDownloadURL();
 
       setState(() {
         indirmeBaglantisi = url;
@@ -169,8 +178,8 @@ class _MetinGirState extends State<MetinGir> {
     CollectionReference kullanicilar = _firestore.collection('Kullanicilar');
     var icerik = kullanicilar.doc(kullanici.email);
     var secim = await icerik.get();
-    dynamic map = secim.data();
-    dynamic unic = map['unic'] ?? 0;
+    Map<String, dynamic>? data = secim.data() as Map<String, dynamic>?;
+    num unic = data?['unic'] ?? 0;
 
     await FirebaseFirestore.instance
         .collection("Kullanicilar")
@@ -212,8 +221,9 @@ class _MetinGirState extends State<MetinGir> {
                 getbox.write('postFotolinki', 'bos');
                 getbox.write('postVideolinki', '');
                 var secim = await icerik.get();
-                dynamic map = secim.data();
-                dynamic unic = map['unic'] ?? 0;
+                Map<String, dynamic>? data =
+                    secim.data() as Map<String, dynamic>?;
+                num unic = data?['unic'] ?? 0;
 
                 if (unic <= 0) {
                   controller.acilGoze = false.obs;
@@ -231,14 +241,19 @@ class _MetinGirState extends State<MetinGir> {
                         Center(
                           child: GestureDetector(
                               onTap: () async {
-                                String getfoto = getbox.read("postFotolinki") ?? 'bos';
-                                String getVideo = getbox.read("postVideolinki") ?? '';
-                                bool hasMedia = getfoto != 'bos' || getVideo.length > 5;
+                                String getfoto =
+                                    getbox.read("postFotolinki") ?? 'bos';
+                                String getVideo =
+                                    getbox.read("postVideolinki") ?? '';
+                                bool hasMedia =
+                                    getfoto != 'bos' || getVideo.length > 5;
 
-                                if (baslikController.text.isNotEmpty || hasMedia) {
+                                if (baslikController.text.isNotEmpty ||
+                                    hasMedia) {
                                   var secim = await icerik.get();
-                                  dynamic map = secim.data();
-                                  dynamic unic = map['unic'] ?? 0;
+                                  Map<String, dynamic>? data =
+                                      secim.data() as Map<String, dynamic>?;
+                                  num unic = data?['unic'] ?? 0;
 
                                   if (unic > 0) {
                                     await unicCikar();
@@ -254,7 +269,8 @@ class _MetinGirState extends State<MetinGir> {
                                   setState(() {
                                     controller.acilGoze = false.obs;
                                   });
-                                  FocusScope.of(context).requestFocus(FocusNode());
+                                  FocusScope.of(context)
+                                      .requestFocus(FocusNode());
                                 }
                                 baslikController.clear();
                               },
@@ -264,24 +280,42 @@ class _MetinGirState extends State<MetinGir> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     IconButton(
-                                      onPressed: (getbox.read('postFotolinki') != 'bos') ? null : galeridenVideoYukle,
+                                      onPressed:
+                                          (getbox.read('postFotolinki') !=
+                                                  'bos')
+                                              ? null
+                                              : galeridenVideoYukle,
                                       icon: Image.asset(
                                         'assets/images/png/camera.png',
                                         width: 25,
-                                        color: (getbox.read('postFotolinki') != 'bos') ? Colors.grey : null,
+                                        color: (getbox.read('postFotolinki') !=
+                                                'bos')
+                                            ? Colors.grey
+                                            : null,
                                       ),
                                     ),
                                     IconButton(
-                                      onPressed:
-                                          (getbox.read('postVideolinki').toString().length > 5) ? null : galeridenYukle,
+                                      onPressed: (getbox
+                                                  .read('postVideolinki')
+                                                  .toString()
+                                                  .length >
+                                              5)
+                                          ? null
+                                          : galeridenYukle,
                                       icon: Image.asset(
                                         'assets/images/png/gallery.png',
                                         width: 25,
-                                        color:
-                                            (getbox.read('postVideolinki').toString().length > 5) ? Colors.grey : null,
+                                        color: (getbox
+                                                    .read('postVideolinki')
+                                                    .toString()
+                                                    .length >
+                                                5)
+                                            ? Colors.grey
+                                            : null,
                                       ),
                                     ),
-                                    Image.asset('assets/images/png/unic.png', width: 35),
+                                    Image.asset('assets/images/png/unic.png',
+                                        width: 35),
                                   ],
                                 ),
                               )),
@@ -291,9 +325,12 @@ class _MetinGirState extends State<MetinGir> {
                           child: TextField(
                             controller: baslikController,
                             onSubmitted: (value) async {
-                              String getfoto = getbox.read("postFotolinki") ?? 'bos';
-                              String getVideo = getbox.read("postVideolinki") ?? '';
-                              bool hasMedia = getfoto != 'bos' || getVideo.length > 5;
+                              String getfoto =
+                                  getbox.read("postFotolinki") ?? 'bos';
+                              String getVideo =
+                                  getbox.read("postVideolinki") ?? '';
+                              bool hasMedia =
+                                  getfoto != 'bos' || getVideo.length > 5;
 
                               if (value.isNotEmpty || hasMedia) {
                                 await metinEkle();
@@ -310,9 +347,11 @@ class _MetinGirState extends State<MetinGir> {
                             maxLength: 440,
                             maxLines: 6,
                             decoration: InputDecoration(
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10.0)),
                               labelText: galeri,
-                              labelStyle: const TextStyle(color: Colors.cyan, fontSize: 18),
+                              labelStyle: const TextStyle(
+                                  color: Colors.cyan, fontSize: 18),
                             ),
                           ),
                         ),
@@ -325,7 +364,8 @@ class _MetinGirState extends State<MetinGir> {
                       color: Colors.black45,
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Image.asset(alinanDosya, height: 30, width: 50, fit: BoxFit.cover),
+                        child: Image.asset(alinanDosya,
+                            height: 30, width: 50, fit: BoxFit.cover),
                       ),
                     ),
                   ),
