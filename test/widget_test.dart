@@ -7,7 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:unicotantic/login/unic_otantic.dart';
+import 'package:unicotantic/features/auth/unic_otantic.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {

@@ -1,5 +1,6 @@
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -7,28 +8,26 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:grock/grock.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:path_provider/path_provider.dart';
 
-import 'core/voice/voice_controller.dart';
-import 'core/voice/commands/system_optimization_command.dart';
+import 'core/utils/translate_getx.dart';
 import 'core/voice/commands/navigate_command.dart';
-
-import 'Unic/fonksiyonlar/serviceDart.dart';
-import 'Unic/fonksiyonlar/translate_getx.dart';
-import 'login/splash.dart';
+import 'core/voice/commands/system_optimization_command.dart';
+import 'core/voice/voice_controller.dart';
+import 'features/ai/unica_chat_page.dart';
+import 'features/auth/auth_kontrol.dart';
+import 'features/auth/splash.dart';
 // Sayfa Importları
-import 'akis/feed.dart'; 
-import 'Unic/yapayZeka/unica_chat_page.dart';
-
-import 'Unic/zaman/zamanBildirimi.dart';
+import 'features/feed/akis.dart';
 import 'firebase_options.dart';
-import 'login/auth_kontrol.dart';
 
 Future<void> main() async {
+  // usePathUrlStrategy(); // Her yenilemede anasayfadan başlaması için kaldırıldı.
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Web reload sırasında oturumun tam yüklenmesini bekleyelim
+  await FirebaseAuth.instance.authStateChanges().first;
   try {
     await Hive.initFlutter('data');
 
@@ -37,8 +36,7 @@ Future<void> main() async {
       try {
         await Hive.openBox(name);
       } catch (e) {
-        debugPrint(
-            "Error opening box $name: $e. Retrying after cleaning lock...");
+        debugPrint("Error opening box $name: $e. Retrying after cleaning lock...");
         try {
           // macOS/iOS/Android için kilit dosyasını temizleme denemesi
           final directory = await getApplicationDocumentsDirectory();
@@ -62,8 +60,7 @@ Future<void> main() async {
     debugPrint("Hive initialization fatal error: $e");
   }
 
-  if (defaultTargetPlatform == TargetPlatform.android ||
-      defaultTargetPlatform == TargetPlatform.iOS) {
+  if (defaultTargetPlatform == TargetPlatform.android) {
     try {
       MobileAds.instance.initialize();
     } catch (e) {
@@ -71,9 +68,6 @@ Future<void> main() async {
     }
   }
 
-  FirebaseNotification().connectNotifi();
-  await NotificationService.initializeNotification();
-  tz.initializeTimeZones();
   await GetStorage.init();
 
   // Akış: Voice Controller Başlatılması
@@ -81,7 +75,6 @@ Future<void> main() async {
   voiceController.registerCommand(SystemOptimizationCommand());
   voiceController.registerCommand(NavigateCommand());
   print("🎤 Akış VoiceController başlatıldı ve komutlar kaydedildi.");
-
 
   runApp(
     ValueListenableBuilder(
@@ -98,18 +91,23 @@ Future<void> main() async {
 
         return GetMaterialApp(
           translations: Messages(),
-          navigatorKey: Grock.navigationKey,
-          scaffoldMessengerKey: Grock.scaffoldMessengerKey,
           locale: Get.deviceLocale,
           fallbackLocale: const Locale('en', 'US'),
           debugShowCheckedModeBanner: false,
-          theme: kutu.get('karanlik_tema', defaultValue: false)
-              ? ThemeData.light()
-              : ThemeData.dark(),
-          home: Splash(),
+          theme: kutu.get('karanlik_tema', defaultValue: false) ? ThemeData.light() : ThemeData.dark(),
+          initialRoute: '/',
+          onGenerateInitialRoutes: (initialRoute) {
+            return [
+              GetPageRoute(
+                page: () => const Splash(),
+                settings: const RouteSettings(name: '/'),
+              )
+            ];
+          },
           getPages: [
+            GetPage(name: '/', page: () => const Splash()),
             GetPage(name: '/AuthKontrol', page: () => const AuthKontrol()),
-            GetPage(name: '/feed', page: () => const FeedSayfasi()), // Akış
+            GetPage(name: '/feed', page: () => const Akis()), // Akış
             GetPage(name: '/unica', page: () => const UnicaChatPage()), // Unica AI
           ],
         );
@@ -121,6 +119,8 @@ Future<void> main() async {
 //flutter pub cache repair
 //flutter pub get
 // flutter build web --no-tree-shake-icons
+//flutter build web --release --no-tree-shake-icons
+
 //firebase deploy --only hosting
 //
 //"prefer_related_applications": false
@@ -134,3 +134,4 @@ Future<void> main() async {
 //firebase deploy --only hosting:unicotantic
 //firebase deploy --only hosting:nesenosun
 //firebase deploy --only hosting:unic-otantic-e4f32
+//flutter run -d chrome --web-port=5001

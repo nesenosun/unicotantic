@@ -8,45 +8,6 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1001866780856:android:2e8b7add3041102186144d",
-        "android_client_info": {
-          "package_name": "com.nesenosun.nesenosun"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "1001866780856-ullgd3t30u8g64924117ap0evnlgimhk.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAaTVXNvz6RVq-0-9fuehrZ9keAU6KKDSA"
-        },
-        {
-          "current_key": "AIzaSyCOOX0a5qP-kvq66Ciw4NwJ3x8-s7K-KMQ"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1001866780856-ullgd3t30u8g64924117ap0evnlgimhk.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "1001866780856-59h73p7at795igq9lliu7ajdsloe5m6q.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.unicotantic.unicotantic.RunnerTests"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:1001866780856:android:b2ff9782a646740d86144d",
         "android_client_info": {
           "package_name": "com.unicotantic.unicotantic"
@@ -76,10 +37,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAaTVXNvz6RVq-0-9fuehrZ9keAU6KKDSA"
-        },
-        {
-          "current_key": "AIzaSyCOOX0a5qP-kvq66Ciw4NwJ3x8-s7K-KMQ"
+          "current_key": "AIzaSyCbW7zta7H-Rd0OFm72MY4NdH9jBF8H2UQ"
         }
       ],
       "services": {
@@ -88,13 +46,6 @@
             {
               "client_id": "1001866780856-ullgd3t30u8g64924117ap0evnlgimhk.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "1001866780856-59h73p7at795igq9lliu7ajdsloe5m6q.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.unicotantic.unicotantic.RunnerTests"
-              }
             }
           ]
         }

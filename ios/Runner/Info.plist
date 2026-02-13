@@ -58,12 +58,12 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.1001866780856-59h73p7at795igq9lliu7ajdsloe5m6q</string>
+				<string>com.googleusercontent.apps.1001866780856-cmmivolbq77i4p0bt8dmi7ee3pb1tu3q</string>
 			</array>
 		</dict>
 	</array>
 	<key>GIDClientID</key>
-	<string>1001866780856-59h73p7at795igq9lliu7ajdsloe5m6q.apps.googleusercontent.com</string>
+	<string>1001866780856-cmmivolbq77i4p0bt8dmi7ee3pb1tu3q.apps.googleusercontent.com</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-1234567890123456~1234567890</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
