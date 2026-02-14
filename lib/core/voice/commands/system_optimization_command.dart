@@ -1,4 +1,4 @@
-
+import 'package:flutter/foundation.dart';
 import '../action_command.dart';
 import '../../optimization/antigravity_optimizer.dart';
 
@@ -16,7 +16,7 @@ class SystemOptimizationCommand extends ActionCommand {
 
   @override
   void execute(dynamic arguments) {
-    print("🚀 Komut Algılandı: Sistem Optimizasyonu");
+    debugPrint("🚀 Komut Algılandı: Sistem Optimizasyonu");
     AntigravityOptimizer.optimizeResources();
     AntigravityOptimizer.auditPerformance();
   }

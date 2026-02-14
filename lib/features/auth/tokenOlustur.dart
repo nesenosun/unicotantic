@@ -40,7 +40,7 @@ class _TokenOlusturState extends State<TokenOlustur> {
     dynamic guncellemeYayinlandi = map['guncellemeYayinlandi'];
     dynamic yeniAyarlar = map['yeniAyarlar'];
 
-    print(ayar);
+    debugPrint(ayar.toString());
 
     puanSa.put('ayar', ayar);
     puanSa.put('guncellemeYayinlandi', guncellemeYayinlandi);
@@ -57,10 +57,10 @@ class _TokenOlusturState extends State<TokenOlustur> {
     if (token != null) {
       return token;
     }
-    print('token : ' + token!);
+    debugPrint('Token alındı');
 
     // Firebase Messaging token'ı yoksa, hata mesajı göster ve null geri dön
-    print('Firebase Messaging tokenı alınamadı');
+    debugPrint('Firebase Messaging tokenı alınamadı');
     return null;
   }
 

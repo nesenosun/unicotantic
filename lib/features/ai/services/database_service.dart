@@ -22,7 +22,7 @@ class DatabaseService {
       _database = await _initDatabase();
       return _database;
     } catch (e) {
-      print("Database Error: $e");
+      debugPrint("Database Error: $e");
       return null;
     }
   }
@@ -30,7 +30,10 @@ class DatabaseService {
   Future<Database?> _initDatabase() async {
     if (kIsWeb) return null;
 
-    if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.linux || defaultTargetPlatform == TargetPlatform.macOS)) {
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.windows ||
+            defaultTargetPlatform == TargetPlatform.linux ||
+            defaultTargetPlatform == TargetPlatform.macOS)) {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
     }
@@ -55,7 +58,7 @@ class DatabaseService {
   }
 
   Future<void> _createTables(Database db) async {
-    print("Veritabanı tabloları kontrol ediliyor...");
+    debugPrint("Veritabanı tabloları kontrol ediliyor...");
     await db.execute('''
       CREATE TABLE IF NOT EXISTS logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -101,11 +104,11 @@ class DatabaseService {
       whereArgs: ['name'],
     );
     if (profileCheck.isNotEmpty) {
-      print("Migration verileri zaten mevcut, atlanıyor.");
+      debugPrint("Migration verileri zaten mevcut, atlanıyor.");
       return;
     }
 
-    print("Eski veriler aktarılıyor...");
+    debugPrint("Eski veriler aktarılıyor...");
     final now = DateTime.now().toIso8601String();
 
     for (var profile in MigrationData.userProfile) {
@@ -123,12 +126,12 @@ class DatabaseService {
         'ai': log['ai'],
       });
     }
-    print("Migration tamamlandı.");
+    debugPrint("Migration tamamlandı.");
   }
 
   Future<void> insertLog(String user, String ai) async {
     final time = DateTime.now().toIso8601String();
-    
+
     if (kIsWeb) {
       final box = Hive.box('unica_logs');
       await box.add({
@@ -148,7 +151,9 @@ class DatabaseService {
     }
 
     // Arka planda Firebase'e yükle (Web'de de çalışır)
-    SyncService().uploadLog(time, user, ai).catchError((e) => print("Firebase upload error: $e"));
+    SyncService()
+        .uploadLog(time, user, ai)
+        .catchError((e) => debugPrint("Firebase upload error: $e"));
   }
 
   Future<void> checkAndInsertLog(Map<String, dynamic> log) async {
@@ -162,7 +167,8 @@ class DatabaseService {
     } else {
       final db = await database;
       if (db == null) return;
-      final exists = await db.query('logs', where: 'time = ?', whereArgs: [time]);
+      final exists =
+          await db.query('logs', where: 'time = ?', whereArgs: [time]);
       if (exists.isEmpty) {
         await db.insert('logs', log);
       }
@@ -177,17 +183,21 @@ class DatabaseService {
       final box = Hive.box('unica_logs');
       final List logs = box.values.toList();
       logs.sort((a, b) => (b['time'] as String).compareTo(a['time'] as String));
-      
+
       final start = offset;
-      final end = (offset + limit) > logs.length ? logs.length : (offset + limit);
+      final end =
+          (offset + limit) > logs.length ? logs.length : (offset + limit);
       if (start >= logs.length) return [];
-      
-      return logs.sublist(start, end).map((e) => Map<String, dynamic>.from(e)).toList();
+
+      return logs
+          .sublist(start, end)
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
     }
 
     final db = await database;
     if (db == null) return [];
-    
+
     return await db.query(
       'logs',
       orderBy: 'time DESC',
@@ -225,7 +235,8 @@ class DatabaseService {
     } else {
       final db = await database;
       if (db == null) return;
-      final exists = await db.query('inner_thoughts', where: 'time = ?', whereArgs: [time]);
+      final exists = await db
+          .query('inner_thoughts', where: 'time = ?', whereArgs: [time]);
       if (exists.isEmpty) {
         await db.insert('inner_thoughts', thought);
       }
@@ -237,13 +248,14 @@ class DatabaseService {
       final box = Hive.box('unica_thoughts');
       if (box.isEmpty) return null;
       final List thoughts = box.values.toList();
-      thoughts.sort((a, b) => (b['time'] as String).compareTo(a['time'] as String));
+      thoughts
+          .sort((a, b) => (b['time'] as String).compareTo(a['time'] as String));
       return thoughts.first['thought'] as String?;
     }
 
     final db = await database;
     if (db == null) return null;
-    
+
     final results = await db.query(
       'inner_thoughts',
       orderBy: 'time DESC',
@@ -267,11 +279,14 @@ class DatabaseService {
     } else {
       final db = await database;
       if (db != null) {
-        await db.insert('user_profile', {
-          'key': key,
-          'value': value,
-          'updated_at': now,
-        }, conflictAlgorithm: ConflictAlgorithm.replace);
+        await db.insert(
+            'user_profile',
+            {
+              'key': key,
+              'value': value,
+              'updated_at': now,
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace);
       }
     }
   }

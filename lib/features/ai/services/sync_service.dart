@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'database_service.dart';
 
 class SyncService {
@@ -17,16 +18,16 @@ class SyncService {
   Future<void> syncAll() async {
     if (_userId == null) return;
     try {
-      print("Firebase senkronizasyonu başlatılıyor: $_userId");
+      debugPrint("Firebase senkronizasyonu başlatılıyor: $_userId");
       // Senkronizasyonun tamamı için 15 saniyelik bir süre tanı
       await Future.wait([
         _syncLogs(),
         _syncProfile(),
         _syncThoughts(),
       ]).timeout(const Duration(seconds: 15));
-      print("Firebase senkronizasyonu tamamlandı.");
+      debugPrint("Firebase senkronizasyonu tamamlandı.");
     } catch (e) {
-      print("Firebase senkronizasyon hatası: $e");
+      debugPrint("Firebase senkronizasyon hatası: $e");
       // Senkronizasyon hatası uygulamanın çalışmasını engellememeli
     }
   }
@@ -44,7 +45,9 @@ class SyncService {
         .collection('logs');
 
     for (var log in localLogs) {
-      await remoteCollection.doc(log['time'].toString().replaceAll('.', '_')).set({
+      await remoteCollection
+          .doc(log['time'].toString().replaceAll('.', '_'))
+          .set({
         'time': log['time'],
         'user': log['user'],
         'ai': log['ai'],
@@ -52,7 +55,10 @@ class SyncService {
     }
 
     // 2. Firebase'deki verileri yerele indir
-    final remoteSnapshot = await remoteCollection.orderBy('time', descending: true).limit(50).get();
+    final remoteSnapshot = await remoteCollection
+        .orderBy('time', descending: true)
+        .limit(50)
+        .get();
     for (var doc in remoteSnapshot.docs) {
       await _db.checkAndInsertLog(doc.data());
     }
@@ -100,12 +106,15 @@ class SyncService {
     final lastThought = await _db.getLastThought();
     if (lastThought != null) {
       // time bilgisi olmadığı için şimdilik manuel oluşturuyoruz (veya DB metotları güncellenebilir)
-      // Ancak getLogs gibi thoughts için de bir liste çekme eklenebilir. 
+      // Ancak getLogs gibi thoughts için de bir liste çekme eklenebilir.
       // Şimdilik sadece indirme kısmına odaklanalım.
     }
 
     // 2. İndir
-    final remoteSnapshot = await remoteCollection.orderBy('time', descending: true).limit(20).get();
+    final remoteSnapshot = await remoteCollection
+        .orderBy('time', descending: true)
+        .limit(20)
+        .get();
     for (var doc in remoteSnapshot.docs) {
       await _db.checkAndInsertThought(doc.data());
     }
@@ -136,10 +145,10 @@ class SyncService {
           .orderBy('time', descending: true)
           .limit(limit)
           .get();
-      
+
       return snapshot.docs.map((doc) => doc.data()).toList();
     } catch (e) {
-      print("Remote logs fetch error: $e");
+      debugPrint("Remote logs fetch error: $e");
       return [];
     }
   }

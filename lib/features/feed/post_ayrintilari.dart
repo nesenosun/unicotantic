@@ -49,7 +49,7 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
         // Sonsuz döngüyü önle
         if (chain.length > 50) break;
       } catch (e) {
-        print("Parent chain error: $e");
+        debugPrint("Parent chain error: $e");
         break;
       }
     }
@@ -61,7 +61,8 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
     if (_commentController.text.trim().isEmpty) return;
 
     try {
-      final postDoc = await _firestore.collection('posts').doc(widget.postID).get();
+      final postDoc =
+          await _firestore.collection('posts').doc(widget.postID).get();
       if (!postDoc.exists) return;
 
       final postData = postDoc.data() as Map<String, dynamic>;
@@ -107,7 +108,7 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
       _commentController.clear();
       FocusScope.of(context).unfocus();
     } catch (e) {
-      print("Yorum gönderme hatası: $e");
+      debugPrint("Yorum gönderme hatası: $e");
     }
   }
 
@@ -126,59 +127,77 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
               icon: const Icon(Iconsax.arrow_left, color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text('Gönderi', style: TextStyle(color: Colors.white, fontSize: 18)),
+            title: const Text('Gönderi',
+                style: TextStyle(color: Colors.white, fontSize: 18)),
           ),
-          bottomNavigationBar: isDesktop ? null : VoiceBottomBar(currentTab: VoiceBottomBarTab.home),
+          bottomNavigationBar: isDesktop
+              ? null
+              : VoiceBottomBar(currentTab: VoiceBottomBarTab.home),
           body: Column(
             children: [
               Expanded(
                 child: FutureBuilder<List<PostModel>>(
                   future: _getParentChain(widget.postID),
                   builder: (context, chainSnapshot) {
-                    if (chainSnapshot.connectionState == ConnectionState.waiting) {
+                    if (chainSnapshot.connectionState ==
+                        ConnectionState.waiting) {
                       return const Center(
-                        child: CircularProgressIndicator(color: Colors.cyanAccent),
+                        child:
+                            CircularProgressIndicator(color: Colors.cyanAccent),
                       );
                     }
 
                     if (!chainSnapshot.hasData || chainSnapshot.data!.isEmpty) {
                       return const Center(
-                        child: Text('Gönderi bulunamadı.', style: TextStyle(color: Colors.white)),
+                        child: Text('Gönderi bulunamadı.',
+                            style: TextStyle(color: Colors.white)),
                       );
                     }
 
                     final parentChain = chainSnapshot.data!;
 
                     return StreamBuilder<DocumentSnapshot>(
-                      stream: _firestore.collection('users').doc(user.uid).snapshots(),
+                      stream: _firestore
+                          .collection('users')
+                          .doc(user.uid)
+                          .snapshots(),
                       builder: (context, userSnap) {
                         if (!userSnap.hasData) return const SizedBox.shrink();
 
-                        final userData = userSnap.data!.data() as Map<String, dynamic>?;
+                        final userData =
+                            userSnap.data!.data() as Map<String, dynamic>?;
                         final List myBlocked = userData?['blockedUsers'] ?? [];
                         final List blockedMe = userData?['blockedBy'] ?? [];
 
                         return StreamBuilder<DocumentSnapshot>(
-                          stream: _firestore.collection('posts').doc(widget.postID).snapshots(),
+                          stream: _firestore
+                              .collection('posts')
+                              .doc(widget.postID)
+                              .snapshots(),
                           builder: (context, snapshot) {
-                            if (!snapshot.hasData || !snapshot.data!.exists) return const SizedBox.shrink();
+                            if (!snapshot.hasData || !snapshot.data!.exists)
+                              return const SizedBox.shrink();
 
-                            final postData = snapshot.data!.data() as Map<String, dynamic>;
+                            final postData =
+                                snapshot.data!.data() as Map<String, dynamic>;
                             final authorId = postData['authorID'] ?? '';
 
                             // Engelleme Kontrolü
-                            if (myBlocked.contains(authorId) || blockedMe.contains(authorId)) {
+                            if (myBlocked.contains(authorId) ||
+                                blockedMe.contains(authorId)) {
                               return Center(
                                 child: Padding(
                                   padding: const EdgeInsets.all(40.0),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Iconsax.user_minus, color: Colors.redAccent, size: 60),
+                                      Icon(Iconsax.user_minus,
+                                          color: Colors.redAccent, size: 60),
                                       const SizedBox(height: 16),
                                       const Text(
                                         'Bu gönderi kısıtlanmıştır.',
-                                        style: TextStyle(color: Colors.white, fontSize: 18),
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18),
                                       ),
                                       const SizedBox(height: 8),
                                       const Text(
@@ -196,11 +215,17 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
                               padding: const EdgeInsets.only(bottom: 16),
                               children: [
                                 // Parent Chain
-                                ...parentChain.take(parentChain.length - 1).map((parentPost) {
+                                ...parentChain
+                                    .take(parentChain.length - 1)
+                                    .map((parentPost) {
                                   return FutureBuilder<DocumentSnapshot>(
-                                    future: _firestore.collection('posts').doc(parentPost.postID).get(),
+                                    future: _firestore
+                                        .collection('posts')
+                                        .doc(parentPost.postID)
+                                        .get(),
                                     builder: (context, parentSnapshot) {
-                                      if (!parentSnapshot.hasData) return const SizedBox.shrink();
+                                      if (!parentSnapshot.hasData)
+                                        return const SizedBox.shrink();
 
                                       // var parentData = parentSnapshot.data!.data() as Map<String, dynamic>;
 
@@ -209,15 +234,20 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => PostAyrintilari(postID: parentPost.postID),
+                                              builder: (context) =>
+                                                  PostAyrintilari(
+                                                      postID:
+                                                          parentPost.postID),
                                             ),
                                           );
                                         },
                                         child: Opacity(
                                           opacity: 0.6,
-                                          child:
-                                              _buildPostCard(parentPost, parentSnapshot.data!, // Snapshot gönderiliyor
-                                                  isParent: true),
+                                          child: _buildPostCard(
+                                              parentPost,
+                                              parentSnapshot
+                                                  .data!, // Snapshot gönderiliyor
+                                              isParent: true),
                                         ),
                                       );
                                     },
@@ -226,15 +256,23 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
 
                                 // Tıklanan Post (Ana Post)
                                 StreamBuilder<DocumentSnapshot>(
-                                  stream: _firestore.collection('posts').doc(widget.postID).snapshots(),
+                                  stream: _firestore
+                                      .collection('posts')
+                                      .doc(widget.postID)
+                                      .snapshots(),
                                   builder: (context, currentSnapshot) {
-                                    if (!currentSnapshot.hasData) return const SizedBox.shrink();
+                                    if (!currentSnapshot.hasData)
+                                      return const SizedBox.shrink();
 
-                                    var currentDataMap = currentSnapshot.data!.data() as Map<String, dynamic>;
-                                    var currentPostLive = PostModel.fromMap(currentDataMap);
+                                    var currentDataMap = currentSnapshot.data!
+                                        .data() as Map<String, dynamic>;
+                                    var currentPostLive =
+                                        PostModel.fromMap(currentDataMap);
 
                                     return _buildPostCard(
-                                        currentPostLive, currentSnapshot.data!, // Snapshot gönderiliyor
+                                        currentPostLive,
+                                        currentSnapshot
+                                            .data!, // Snapshot gönderiliyor
                                         isCurrent: true);
                                   },
                                 ),
@@ -244,21 +282,28 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
                                 StreamBuilder<QuerySnapshot>(
                                   stream: _firestore
                                       .collection('posts')
-                                      .where('parentID', isEqualTo: widget.postID)
+                                      .where('parentID',
+                                          isEqualTo: widget.postID)
                                       .snapshots(),
                                   builder: (context, commentsSnapshot) {
                                     if (!commentsSnapshot.hasData) {
                                       return const SizedBox.shrink();
                                     }
 
-                                    var comments = commentsSnapshot.data!.docs.toList();
+                                    var comments =
+                                        commentsSnapshot.data!.docs.toList();
 
                                     comments.sort((a, b) {
-                                      var aData = a.data() as Map<String, dynamic>;
-                                      var bData = b.data() as Map<String, dynamic>;
-                                      var aTime = aData['createdAt'] as Timestamp?;
-                                      var bTime = bData['createdAt'] as Timestamp?;
-                                      if (aTime == null || bTime == null) return 0;
+                                      var aData =
+                                          a.data() as Map<String, dynamic>;
+                                      var bData =
+                                          b.data() as Map<String, dynamic>;
+                                      var aTime =
+                                          aData['createdAt'] as Timestamp?;
+                                      var bTime =
+                                          bData['createdAt'] as Timestamp?;
+                                      if (aTime == null || bTime == null)
+                                        return 0;
                                       return aTime.compareTo(bTime);
                                     });
 
@@ -267,21 +312,27 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
                                     }
 
                                     return Column(
-                                      children: comments.asMap().entries.map((entry) {
+                                      children:
+                                          comments.asMap().entries.map((entry) {
                                         int index = entry.key;
                                         var doc = entry.value;
-                                        var commentData = doc.data() as Map<String, dynamic>;
-                                        PostModel comment = PostModel.fromMap(commentData);
+                                        var commentData =
+                                            doc.data() as Map<String, dynamic>;
+                                        PostModel comment =
+                                            PostModel.fromMap(commentData);
                                         return GestureDetector(
                                           onTap: () {
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => PostAyrintilari(postID: comment.postID),
+                                                builder: (context) =>
+                                                    PostAyrintilari(
+                                                        postID: comment.postID),
                                               ),
                                             );
                                           },
-                                          child: _buildPostCard(comment, doc, // Snapshot gönderiliyor
+                                          child: _buildPostCard(comment,
+                                              doc, // Snapshot gönderiliyor
                                               isComment: true,
                                               commentDocs: comments,
                                               commentIndex: index),
@@ -302,7 +353,8 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
 
               // Yorum Girişi
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: Colors.grey[900],
                   boxShadow: [
@@ -329,7 +381,8 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
                               borderRadius: BorderRadius.circular(24),
                               borderSide: BorderSide.none,
                             ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
                           ),
                           maxLines: null,
                           textInputAction: TextInputAction.send,
@@ -339,7 +392,8 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
                       const SizedBox(width: 8),
                       IconButton(
                         onPressed: _sendComment,
-                        icon: const Icon(Iconsax.send_1, color: Colors.cyanAccent),
+                        icon: const Icon(Iconsax.send_1,
+                            color: Colors.cyanAccent),
                         iconSize: 28,
                       ),
                     ],
@@ -361,8 +415,10 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border(
-                        left: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
-                        right: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
+                        left: BorderSide(
+                            color: Colors.white.withOpacity(0.05), width: 1),
+                        right: BorderSide(
+                            color: Colors.white.withOpacity(0.05), width: 1),
                       ),
                     ),
                     child: content,
@@ -410,12 +466,15 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
             index: safeIndex,
           ),
           PostContentText(content: post.text),
-          if (post.mediaUrl != null && post.mediaUrl != 'bos' && post.mediaUrl != '')
+          if (post.mediaUrl != null &&
+              post.mediaUrl != 'bos' &&
+              post.mediaUrl != '')
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: Card(
                 clipBehavior: Clip.antiAlias,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
                 child: post.mediaType == 'video'
                     ? FeedVideoPlayer(videoUrl: post.mediaUrl!)
                     : Image.network(
@@ -423,7 +482,9 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
                         fit: BoxFit.cover,
                         width: double.infinity,
                         errorBuilder: (context, error, stackTrace) =>
-                            const SizedBox(height: 200, child: Center(child: Icon(Icons.error))),
+                            const SizedBox(
+                                height: 200,
+                                child: Center(child: Icon(Icons.error))),
                       ),
               ),
             ),

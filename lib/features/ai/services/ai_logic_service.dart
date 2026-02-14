@@ -1,12 +1,15 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'database_service.dart';
 import 'sync_service.dart';
 
 class AiLogicService {
+  // API anahtarı artık derleme zamanında --dart-define ile sağlanır
+  // Örnek: flutter run --dart-define=GROQ_API_KEY=gsk_xxx
   static const String _apiKey =
-      "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";
+      String.fromEnvironment('GROQ_API_KEY', defaultValue: '');
   static const String _apiUrl =
       "https://api.groq.com/openai/v1/chat/completions";
   static const String _model = "llama-3.3-70b-versatile";
@@ -17,7 +20,7 @@ class AiLogicService {
     try {
       return await rootBundle.loadString('assets/base_system.txt');
     } catch (e) {
-      print("System Prompt Load Error: $e");
+      debugPrint("System Prompt Load Error: $e");
       return "Sen Unica'sın.";
     }
   }
@@ -54,9 +57,15 @@ $daily
   }
 
   Future<String> generateInnerThought(String userInput) async {
+    if (_apiKey.isEmpty) {
+      debugPrint(
+          "UYARI: GROQ_API_KEY tanımlanmamış. --dart-define=GROQ_API_KEY=xxx kullanın.");
+      return "...";
+    }
+
     try {
       final prompt = "İç durum analizi yap ama kısa tut:\n$userInput";
-      print("Inner thought is being generated for: $userInput");
+      debugPrint("Inner thought oluşturuluyor...");
 
       final response = await http
           .post(
@@ -76,7 +85,7 @@ $daily
           )
           .timeout(const Duration(seconds: 15));
 
-      print("Inner thought response status: ${response.statusCode}");
+      debugPrint("Inner thought yanıt kodu: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
@@ -85,18 +94,23 @@ $daily
         return thought;
       }
     } catch (e) {
-      print("Inner Thought Generation Error: $e");
+      debugPrint("Inner Thought hatası: $e");
     }
     return "...";
   }
 
   Future<Map<String, dynamic>> chat(String message) async {
+    if (_apiKey.isEmpty) {
+      throw Exception(
+          'AI servisi yapılandırılmamış. Lütfen API anahtarını ayarlayın.');
+    }
+
     try {
       final thought = await generateInnerThought(message);
 
       final systemPrompt = await _buildSystemPrompt();
       var pastLogs = await _db.getLogs(limit: 4);
-      
+
       if (pastLogs.isEmpty) {
         pastLogs = await SyncService().getRemoteLogs(limit: 4);
       }
@@ -112,7 +126,7 @@ $daily
 
       messages.add({"role": "user", "content": message});
 
-      print("Main chat request is being sent for: $message");
+      debugPrint("Chat isteği gönderiliyor...");
       final response = await http
           .post(
             Uri.parse(_apiUrl),
@@ -129,7 +143,7 @@ $daily
           )
           .timeout(const Duration(seconds: 20));
 
-      print("Main chat response status: ${response.statusCode}");
+      debugPrint("Chat yanıt kodu: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
@@ -139,11 +153,11 @@ $daily
 
         return {"response": aiText, "thought": thought};
       } else {
-        print("Groq API Error Body: ${response.body}");
-        throw Exception('Groq API Hatası: ${response.statusCode}');
+        debugPrint("Groq API Hata Detayı: ${response.body}");
+        throw Exception('AI servisiyle iletişim kurulamadı.');
       }
     } catch (e) {
-      print("Main Chat Exception: $e");
+      debugPrint("Chat hatası: $e");
       rethrow;
     }
   }

@@ -92,7 +92,9 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
           length: 3,
           child: Scaffold(
             backgroundColor: Colors.black,
-            bottomNavigationBar: isDesktop ? null : VoiceBottomBar(currentTab: VoiceBottomBarTab.profile),
+            bottomNavigationBar: isDesktop
+                ? null
+                : VoiceBottomBar(currentTab: VoiceBottomBarTab.profile),
             floatingActionButton: _showScrollToTop
                 ? FloatingActionButton.small(
                     onPressed: _scrollToTopAndRefresh,
@@ -100,10 +102,14 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                     child: const Icon(Iconsax.arrow_up, color: Colors.black),
                   )
                 : null,
-            floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.startFloat,
             body: SafeArea(
               child: StreamBuilder<QuerySnapshot>(
-                stream: firestore.collection('posts').where('authorID', isEqualTo: user.uid).snapshots(),
+                stream: firestore
+                    .collection('posts')
+                    .where('authorID', isEqualTo: user.uid)
+                    .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) return buildDefaultTextStyle();
 
@@ -112,8 +118,10 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                   docs.sort((a, b) {
                     var aData = a.data() as Map<String, dynamic>;
                     var bData = b.data() as Map<String, dynamic>;
-                    var aTime = (aData['createdAt'] as Timestamp?)?.toDate() ?? DateTime(2000);
-                    var bTime = (bData['createdAt'] as Timestamp?)?.toDate() ?? DateTime(2000);
+                    var aTime = (aData['createdAt'] as Timestamp?)?.toDate() ??
+                        DateTime(2000);
+                    var bTime = (bData['createdAt'] as Timestamp?)?.toDate() ??
+                        DateTime(2000);
                     return bTime.compareTo(aTime);
                   });
 
@@ -130,7 +138,9 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                   final media = docs.where((d) {
                     var data = d.data() as Map<String, dynamic>;
                     var post = PostModel.fromMap(data);
-                    return post.mediaUrl != null && post.mediaUrl!.isNotEmpty && post.mediaUrl != 'bos';
+                    return post.mediaUrl != null &&
+                        post.mediaUrl!.isNotEmpty &&
+                        post.mediaUrl != 'bos';
                   }).toList();
 
                   return NestedScrollView(
@@ -140,14 +150,19 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                         SliverToBoxAdapter(
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
-                            height: _headerHeight > 0.3 ? (280 * _headerHeight).clamp(0.0, 300.0) : 0,
+                            height: _headerHeight > 0.3
+                                ? (280 * _headerHeight).clamp(0.0, 300.0)
+                                : 0,
                             curve: Curves.easeInOut,
                             child: _headerHeight > 0.3
                                 ? SingleChildScrollView(
-                                    physics: const NeverScrollableScrollPhysics(),
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
                                     child: Opacity(
-                                      opacity: ((_headerHeight - 0.3) / 0.7).clamp(0.0, 1.0),
-                                      child: _buildHeader(user, firestore, posts.length),
+                                      opacity: ((_headerHeight - 0.3) / 0.7)
+                                          .clamp(0.0, 1.0),
+                                      child: _buildHeader(
+                                          user, firestore, posts.length),
                                     ),
                                   )
                                 : const SizedBox.shrink(),
@@ -195,8 +210,10 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border(
-                        left: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
-                        right: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
+                        left: BorderSide(
+                            color: Colors.white.withOpacity(0.05), width: 1),
+                        right: BorderSide(
+                            color: Colors.white.withOpacity(0.05), width: 1),
                       ),
                     ),
                     child: content,
@@ -279,7 +296,10 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                       }
                     },
                     color: Colors.grey[900],
-                    icon: SizedBox(height: 30, width: 30, child: Image.asset("assets/images/png/settings.png")),
+                    icon: SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: Image.asset("assets/images/png/settings.png")),
                     itemBuilder: (BuildContext context) => [
                       const PopupMenuItem<String>(
                         value: 'edit',
@@ -287,7 +307,8 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                           children: [
                             Icon(Iconsax.edit, color: Colors.white, size: 20),
                             SizedBox(width: 10),
-                            Text('Profili Düzenle', style: TextStyle(color: Colors.white)),
+                            Text('Profili Düzenle',
+                                style: TextStyle(color: Colors.white)),
                           ],
                         ),
                       ),
@@ -297,7 +318,8 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                           children: [
                             Icon(Iconsax.logout, color: Colors.red, size: 20),
                             SizedBox(width: 10),
-                            Text('Çıkış Yap', style: TextStyle(color: Colors.red)),
+                            Text('Çıkış Yap',
+                                style: TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),
@@ -333,11 +355,14 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                 children: [
                   _buildStatColumn(postCountStr, "Gönderi"),
                   Container(width: 1, height: 30, color: Colors.grey[800]),
-                  _buildStatColumn(friendCount, "Arkadaşlar", onTap: () => Get.to(() => const ArkadaslarPage())),
+                  _buildStatColumn(friendCount, "Arkadaşlar",
+                      onTap: () => Get.to(() => const ArkadaslarPage())),
                   Container(width: 1, height: 30, color: Colors.grey[800]),
-                  _buildStatColumn(followerCount, "Takipçi", onTap: () => Get.to(() => const TakipcilerPage())),
+                  _buildStatColumn(followerCount, "Takipçi",
+                      onTap: () => Get.to(() => const TakipcilerPage())),
                   Container(width: 1, height: 30, color: Colors.grey[800]),
-                  _buildStatColumn(followingCount, "Takip", onTap: () => Get.to(() => const TakipEttiklerimPage())),
+                  _buildStatColumn(followingCount, "Takip",
+                      onTap: () => Get.to(() => const TakipEttiklerimPage())),
                 ],
               ),
             ],
@@ -406,12 +431,15 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                   index: index,
                 ),
                 PostContentText(content: post.text),
-                if (post.mediaUrl != null && post.mediaUrl != 'bos' && post.mediaUrl != '')
+                if (post.mediaUrl != null &&
+                    post.mediaUrl != 'bos' &&
+                    post.mediaUrl != '')
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: Card(
                       clipBehavior: Clip.antiAlias,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
                       child: post.mediaType == 'video'
                           ? FeedVideoPlayer(videoUrl: post.mediaUrl!)
                           : Image.network(
@@ -419,7 +447,9 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                               fit: BoxFit.cover,
                               width: double.infinity,
                               errorBuilder: (context, error, stackTrace) =>
-                                  const SizedBox(height: 200, child: Center(child: Icon(Icons.error))),
+                                  const SizedBox(
+                                      height: 200,
+                                      child: Center(child: Icon(Icons.error))),
                             ),
                     ),
                   ),
@@ -464,14 +494,16 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FullScreenImageViewer(imageUrl: post.mediaUrl!),
+                  builder: (context) =>
+                      FullScreenImageViewer(imageUrl: post.mediaUrl!),
                 ),
               );
             } else {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FullScreenVideoPlayer(videoUrl: post.mediaUrl!),
+                  builder: (context) =>
+                      FullScreenVideoPlayer(videoUrl: post.mediaUrl!),
                 ),
               );
             }
@@ -499,19 +531,13 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
   Future<void> signOutFromApp() async {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn.instance;
-
       await googleSignIn.signOut();
-
       await FirebaseAuth.instance.signOut();
 
-      if (kDebugMode) {
-        Get.off(Splash());
-        print("Oturum başarıyla kapatıldı.");
-      }
+      debugPrint("Oturum başarıyla kapatıldı.");
+      Get.off(Splash());
     } catch (e) {
-      if (kDebugMode) {
-        print("Çıkış yapılırken hata oluştu: $e");
-      }
+      debugPrint("Çıkış yapılırken hata oluştu: $e");
     }
   }
 }
@@ -527,7 +553,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       color: Colors.black,
       child: _tabBar,

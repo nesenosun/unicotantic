@@ -1,34 +1,132 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Unica Hafızası - Sadece ilgili kullanıcı
-    // Kullanıcı Profilleri ve Unica Hafızası
+
+    // ===== YARDIMCI FONKSİYONLAR =====
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isSignedIn() && (request.auth.uid == userId || request.auth.token.email == userId);
+    }
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ===== KULLANICI PROFİLLERİ =====
     match /users/{userId} {
-      allow read: if true;
-      allow write: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == userId);
-      
+      // Sadece giriş yapmış kullanıcılar okuyabilir (herkese açık değil)
+      allow read: if isSignedIn();
+      // Sadece hesap sahibi kendi profilini yazabilir
+      allow write: if isOwner(userId);
+
+      // Alt koleksiyonlar (Unica hafızası vb.)
       match /{document=**} {
-        allow read, write: if request.auth != null && (request.auth.uid == userId || request.auth.token.email == userId);
+        allow read, write: if isOwner(userId);
       }
     }
-    
-    // Arkadaşlık İstekleri
+
+    // ===== KULLANICI ADI REZERVASYONLARİ =====
+    match /usernames/{username} {
+      allow read: if isSignedIn();
+      // Sadece kendi username'ini oluşturabilir
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // ===== POSTLAR =====
+    match /posts/{postId} {
+      allow read: if isSignedIn();
+      // Sadece giriş yapmış kullanıcılar post oluşturabilir, authorID kendisi olmalı
+      allow create: if isSignedIn() && request.resource.data.authorID == request.auth.uid;
+      // Sadece post sahibi güncelleyebilir VEYA sayaç güncellemeleri (like/dislike/comment)
+      allow update: if isSignedIn();
+      // Sadece post sahibi veya admin silebilir
+      allow delete: if isSignedIn() && (resource.data.authorID == request.auth.uid || isAdmin());
+    }
+
+    // ===== BEĞENİLER =====
+    match /likes/{likeId} {
+      allow read: if isSignedIn();
+      // Sadece kendi beğenisini oluşturabilir
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      // Sadece kendi beğenisini silebilir
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // ===== BEĞENMEMELER =====
+    match /dislikes/{dislikeId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // ===== YER İMLERİ =====
+    match /bookmarks/{userId} {
+      allow read, write: if isOwner(userId);
+      match /userBookmarks/{bookmarkId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ===== TAKİPÇİLER =====
+    match /followers/{userId}/userFollowers/{followerId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (request.auth.uid == userId || request.auth.uid == followerId);
+    }
+
+    // ===== TAKİP EDİLENLER =====
+    match /following/{userId}/userFollowing/{followedId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // ===== ARKADAŞLIK İSTEKLERİ =====
     match /friendRequests/{requestId} {
-      allow read: if request.auth != null && (resource.data.senderId == request.auth.uid || resource.data.receiverId == request.auth.uid);
-      allow create: if request.auth != null && request.resource.data.senderId == request.auth.uid;
-      allow update, delete: if request.auth != null && (resource.data.senderId == request.auth.uid || resource.data.receiverId == request.auth.uid);
+      allow read: if isSignedIn() && (resource.data.senderId == request.auth.uid || resource.data.receiverId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid;
+      allow update, delete: if isSignedIn() && (resource.data.senderId == request.auth.uid || resource.data.receiverId == request.auth.uid);
     }
 
-    // Arkadaşlar
+    // ===== ARKADAŞLAR =====
     match /friends/{userId}/userFriends/{friendId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && (request.auth.uid == userId);
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (request.auth.uid == userId || request.auth.uid == friendId);
     }
 
-    // Diğer her şey için - Sadece kayıtlı kullanıcılar okuyabilir, yazma kapalı
+    // ===== BİLDİRİMLER =====
+    match /firebasedenofication/{userId} {
+      allow read: if isOwner(userId);
+      match /notifications/{notifId} {
+        // Sadece hedef kullanıcı okuyabilir
+        allow read: if isOwner(userId);
+        // Giriş yapmış herhangi bir kullanıcı bildirim oluşturabilir (like/comment/follow)
+        allow create: if isSignedIn();
+        // Sadece bildirim sahibi güncelleyebilir (okundu olarak işaretleme)
+        allow update: if isOwner(userId);
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    // ===== UYGULAMA AYARLARI =====
+    match /{settingsCollection}/{docId} {
+      allow read: if isSignedIn() && settingsCollection == 'uygulamaAyarlar\u0131';
+      allow write: if isAdmin() && settingsCollection == 'uygulamaAyarlar\u0131';
+    }
+
+    // ===== ÜYE OLMAYAN TOKEN =====
+    match /uyeOlmayanToken/{tokenId} {
+      allow read: if false;
+      allow create: if true; // Anonim kullanıcılar bile token kaydedebilir
+      allow update, delete: if false;
+    }
+
+    // ===== VARSAYILAN KURAL: Her şeyi kapat =====
     match /{document=**} {
-       allow read: if request.auth != null;
-       allow write: if false; 
+      allow read: if isSignedIn();
+      allow write: if false;
     }
   }
 }

@@ -1,14 +1,13 @@
-
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import '../action_command.dart';
 
 /// Akış Projesi - Navigasyon Komutu
 /// "Profile git", "Ayarları aç" gibi komutlarla sayfa geçişi sağlar.
 class NavigateCommand extends ActionCommand {
-  
   // Basit rota haritası
   final Map<String, String> routes = {
-    'profil': '/profile', 
+    'profil': '/profile',
     'ayarlar': '/settings',
     'ana yetki': '/home',
     'giriş': '/login',
@@ -22,18 +21,12 @@ class NavigateCommand extends ActionCommand {
   };
 
   @override
-  List<String> get triggers => [
-        'git',
-        'aç',
-        'yönlendir',
-        'göster',
-        'geç' 
-      ];
+  List<String> get triggers => ['git', 'aç', 'yönlendir', 'göster', 'geç'];
 
   @override
   void execute(dynamic arguments) {
     String input = arguments.toString().toLowerCase();
-    
+
     // Hangi rotaya gitmek istediğini bul
     String? targetRoute;
     routes.forEach((key, value) {
@@ -43,14 +36,13 @@ class NavigateCommand extends ActionCommand {
     });
 
     if (targetRoute != null) {
-      print("🚀 Navigasyon: $targetRoute rotasına gidiliyor...");
-      
+      debugPrint("🚀 Navigasyon: $targetRoute rotasına gidiliyor...");
+
       // GetX Rota Yönetimi
       // Eğer zaten o sayfadaysa gitme (opsiyonel kontrol eklenebilir)
       Get.toNamed(targetRoute!);
-      
     } else {
-      print("⚠️ Hedef rota anlaşılamadı.");
+      debugPrint("⚠️ Hedef rota anlaşılamadı.");
       // Sesli geri bildirim eklenebilir
     }
   }

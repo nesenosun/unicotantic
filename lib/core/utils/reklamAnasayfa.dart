@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -39,10 +40,10 @@ class _ReklamAnaSayfaState extends State<ReklamAnaSayfa> {
     if (token != null) {
       return token;
     }
-    print('token : ' + token!);
+    debugPrint('Token alındı');
 
     // Firebase Messaging token'ı yoksa, hata mesajı göster ve null geri dön
-    print('Firebase Messaging tokenı alınamadı');
+    debugPrint('Firebase Messaging tokenı alınamadı');
     return null;
   }
 
@@ -56,7 +57,7 @@ class _ReklamAnaSayfaState extends State<ReklamAnaSayfa> {
 
   @override
   Widget build(BuildContext context) {
-    print('uygulamaSurumu: ' +
+    debugPrint('uygulamaSurumu: ' +
         puanSa.get('uygulamaSurumu',
             defaultValue: 'uygulama surumu yuklenmedi'));
     return puanSa.get('uygulamaSurumu') == 'bir'

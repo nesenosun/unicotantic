@@ -25,6 +25,17 @@ class _AdminSayfasiState extends State<AdminSayfasi> {
       return;
     }
 
+    // Sunucu tarafında admin rolünü doğrula
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .get();
+    final role = userDoc.data()?['role'] ?? 'user';
+    if (role != 'admin') {
+      Get.snackbar('Hata', 'Admin yetkiniz doğrulanamadı.');
+      return;
+    }
+
     setState(() {
       isProcessing = true;
       statusMessage = "Veriler siliniyor...";
@@ -139,7 +150,8 @@ class _AdminSayfasiState extends State<AdminSayfasi> {
         }
       }
 
-      setState(() => statusMessage = "${activeUrls.length} aktif medya bulundu. Storage taranıyor...");
+      setState(() => statusMessage =
+          "${activeUrls.length} aktif medya bulundu. Storage taranıyor...");
 
       // 2. Scan Storage Folders
       List<String> folders = ['postFotoları', 'postVideolari', 'profilePhotos'];
@@ -152,18 +164,19 @@ class _AdminSayfasiState extends State<AdminSayfasi> {
         // Subfolders (typically by user id/email)
         for (Reference subFolder in folderResult.prefixes) {
           final ListResult subFolderResult = await subFolder.listAll();
-          
+
           for (Reference fileRef in subFolderResult.items) {
             checkedCount++;
             final String url = await fileRef.getDownloadURL();
-            
+
             // If URL is not in Firestore, it's an orphan
             if (!activeUrls.contains(url)) {
               await fileRef.delete();
               deletedCount++;
             }
-            
-            setState(() => statusMessage = "$folder taranıyor... Kontrol edilen: $checkedCount, Silinen: $deletedCount");
+
+            setState(() => statusMessage =
+                "$folder taranıyor... Kontrol edilen: $checkedCount, Silinen: $deletedCount");
           }
         }
 
@@ -175,11 +188,13 @@ class _AdminSayfasiState extends State<AdminSayfasi> {
             await fileRef.delete();
             deletedCount++;
           }
-          setState(() => statusMessage = "$folder taranıyor... Kontrol edilen: $checkedCount, Silinen: $deletedCount");
+          setState(() => statusMessage =
+              "$folder taranıyor... Kontrol edilen: $checkedCount, Silinen: $deletedCount");
         }
       }
 
-      Get.snackbar('Başarılı', 'Temizlik tamamlandı. $deletedCount yetim dosya silindi.');
+      Get.snackbar('Başarılı',
+          'Temizlik tamamlandı. $deletedCount yetim dosya silindi.');
     } catch (e) {
       Get.snackbar('Hata', 'Temizlik sırasında hata: $e');
     } finally {
@@ -259,7 +274,8 @@ class _AdminSayfasiState extends State<AdminSayfasi> {
                       onPressed: () {
                         Get.defaultDialog(
                           title: 'Storage Temizliği',
-                          middleText: 'Bağlantısı kopmuş tüm fotoğraf ve videolar silinecek. Devam edilsin mi?',
+                          middleText:
+                              'Bağlantısı kopmuş tüm fotoğraf ve videolar silinecek. Devam edilsin mi?',
                           textConfirm: 'TEMİZLE',
                           textCancel: 'İPTAL',
                           confirmTextColor: Colors.white,
@@ -316,7 +332,8 @@ class _AdminSayfasiState extends State<AdminSayfasi> {
           backgroundColor: color,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 18),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           elevation: 5,
         ),
       ),
