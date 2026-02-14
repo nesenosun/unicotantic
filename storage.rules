@@ -1,0 +1,13 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      // Sadece giriş yapmış kullanıcılar okuyabilir
+      allow read: if request.auth != null;
+      
+      // Yazma ve silme işlemleri sadece dosya bazında veya klasör bazında kısıtlanmalı
+      // Şimdilik genel bir auth kontrolü, ancak ileride userId bazlı klasörlere geçilmeli
+      allow write: if request.auth != null;
+    }
+  }
+}

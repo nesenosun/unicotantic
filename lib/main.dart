@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -32,11 +34,12 @@ Future<void> main() async {
     await Hive.initFlutter('data');
 
     // Kilit hatası durumunda temizlik yapmak için boxları tek tek açmayı deniyoruz
-    Future<void> openBoxWithRetry(String name) async {
+    Future<void> openBoxWithRetry(String name, {HiveAesCipher? cipher}) async {
       try {
-        await Hive.openBox(name);
+        await Hive.openBox(name, encryptionCipher: cipher);
       } catch (e) {
-        debugPrint("Error opening box $name: $e. Retrying after cleaning lock...");
+        debugPrint(
+            "Error opening box $name: $e. Retrying after cleaning lock...");
         try {
           // macOS/iOS/Android için kilit dosyasını temizleme denemesi
           final directory = await getApplicationDocumentsDirectory();
@@ -44,7 +47,7 @@ Future<void> main() async {
           if (await lockFile.exists()) {
             await lockFile.delete();
             debugPrint("Lock file deleted: $name.lock");
-            await Hive.openBox(name);
+            await Hive.openBox(name, encryptionCipher: cipher);
           }
         } catch (retryError) {
           debugPrint("Retry failed for $name: $retryError");
@@ -52,10 +55,24 @@ Future<void> main() async {
       }
     }
 
+    // Şifreleme anahtarı hazırlığı
+    const secureStorage = FlutterSecureStorage();
+    String? encryptionKeyString = await secureStorage.read(key: 'hive_key');
+    if (encryptionKeyString == null) {
+      final key = Hive.generateSecureKey();
+      await secureStorage.write(
+        key: 'hive_key',
+        value: base64UrlEncode(key),
+      );
+      encryptionKeyString = await secureStorage.read(key: 'hive_key');
+    }
+    final key = base64Url.decode(encryptionKeyString!);
+    final encryptionCipher = HiveAesCipher(key);
+
     await openBoxWithRetry("unicotantic");
-    await openBoxWithRetry('unica_logs');
-    await openBoxWithRetry('unica_profile');
-    await openBoxWithRetry('unica_thoughts');
+    await openBoxWithRetry('unica_logs', cipher: encryptionCipher);
+    await openBoxWithRetry('unica_profile', cipher: encryptionCipher);
+    await openBoxWithRetry('unica_thoughts', cipher: encryptionCipher);
   } catch (e) {
     debugPrint("Hive initialization fatal error: $e");
   }
@@ -74,7 +91,7 @@ Future<void> main() async {
   final voiceController = Get.put(VoiceController());
   voiceController.registerCommand(SystemOptimizationCommand());
   voiceController.registerCommand(NavigateCommand());
-  print("🎤 Akış VoiceController başlatıldı ve komutlar kaydedildi.");
+  debugPrint("🎤 Akış VoiceController başlatıldı ve komutlar kaydedildi.");
 
   runApp(
     ValueListenableBuilder(
@@ -94,7 +111,9 @@ Future<void> main() async {
           locale: Get.deviceLocale,
           fallbackLocale: const Locale('en', 'US'),
           debugShowCheckedModeBanner: false,
-          theme: kutu.get('karanlik_tema', defaultValue: false) ? ThemeData.light() : ThemeData.dark(),
+          theme: kutu.get('karanlik_tema', defaultValue: false)
+              ? ThemeData.light()
+              : ThemeData.dark(),
           initialRoute: '/',
           onGenerateInitialRoutes: (initialRoute) {
             return [
@@ -108,7 +127,8 @@ Future<void> main() async {
             GetPage(name: '/', page: () => const Splash()),
             GetPage(name: '/AuthKontrol', page: () => const AuthKontrol()),
             GetPage(name: '/feed', page: () => const Akis()), // Akış
-            GetPage(name: '/unica', page: () => const UnicaChatPage()), // Unica AI
+            GetPage(
+                name: '/unica', page: () => const UnicaChatPage()), // Unica AI
           ],
         );
       },
