@@ -6,46 +6,26 @@ service firebase.storage {
     function isSignedIn() {
       return request.auth != null;
     }
-    function isImageType() {
-      return request.resource.contentType.matches('image/.*');
-    }
-    function isVideoType() {
-      return request.resource.contentType.matches('video/.*');
-    }
-
-    // ===== POST FOTOĞRAFLARI =====
-    match /{photoFolder}/{userId}/{fileName} {
-      // Post fotoğrafları klasörü
-      allow read: if isSignedIn() && photoFolder.matches('postFoto.*');
-      // Sadece kendi klasörüne yükleyebilir, sadece resim, max 10MB
-      allow write: if isSignedIn()
-                   && photoFolder.matches('postFoto.*')
-                   && request.auth.token.email == userId
-                   && isImageType()
-                   && request.resource.size < 10 * 1024 * 1024;
-      allow delete: if isSignedIn() && photoFolder.matches('postFoto.*') && request.auth.token.email == userId;
+    
+    // Kullanıcın kendi klasörü mü? (Email veya UID olabilir)
+    function isOwner(userId) {
+      return isSignedIn() && (
+        request.auth.token.email == userId || 
+        request.auth.uid == userId
+      );
     }
 
-    // ===== POST VİDEOLARI =====
-    match /postVideolari/{userId}/{fileName} {
+    // ===== POST MEDYALARI (Fotoğraf/Video) =====
+    match /{folder}/{userId}/{fileName} {
       allow read: if isSignedIn();
-      // Sadece kendi klasörüne yükleyebilir, sadece video, max 50MB
+      
+      // Post fotoları, videoları veya profil fotoları için genel izin
+      // folder.matches('postFoto.*') || folder == 'postVideolari' || folder == 'profilePhotos'
       allow write: if isSignedIn()
-                   && request.auth.token.email == userId
-                   && isVideoType()
-                   && request.resource.size < 50 * 1024 * 1024;
-      allow delete: if isSignedIn() && request.auth.token.email == userId;
-    }
-
-    // ===== PROFİL FOTOĞRAFLARI =====
-    match /profilePhotos/{userId}/{fileName} {
-      allow read: if isSignedIn();
-      // Sadece kendi profil fotoğrafını yükleyebilir, max 5MB
-      allow write: if isSignedIn()
-                   && request.auth.token.email == userId
-                   && isImageType()
-                   && request.resource.size < 5 * 1024 * 1024;
-      allow delete: if isSignedIn() && request.auth.token.email == userId;
+                   && isOwner(userId)
+                   && request.resource.size < 50 * 1024 * 1024; // Genel 50MB sınırı
+                   
+      allow delete: if isOwner(userId);
     }
 
     // ===== VARSAYILAN: Her şeyi kapat =====

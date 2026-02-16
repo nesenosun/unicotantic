@@ -7,9 +7,11 @@ import 'package:unicotantic/features/feed/feed_video_player.dart';
 import 'package:unicotantic/features/feed/post_ayrintilari.dart';
 import 'package:unicotantic/features/feed/post_olustur_panel.dart';
 import 'package:unicotantic/features/profile/site.dart';
+import 'package:get/get.dart';
 
 import '../../core/utils/postSabitleri.dart';
 import '../../core/voice/widgets/voice_bottom_bar.dart';
+import 'package:cached_network_image/cached_network_image.dart'; // Cache import
 
 enum FeedType { explore, following, friends }
 
@@ -67,21 +69,21 @@ class _AkisState extends State<Akis> {
                         tooltip: 'Menü',
                       ),
                     ),
-              title: const TabBar(
+              title: TabBar(
                 isScrollable: true,
                 tabAlignment: TabAlignment.center,
                 indicatorColor: Colors.cyanAccent,
                 labelColor: Colors.cyanAccent,
                 unselectedLabelColor: Colors.grey,
                 labelStyle:
-                    TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 indicatorSize: TabBarIndicatorSize.label,
                 dividerColor: Colors.transparent,
-                labelPadding: EdgeInsets.symmetric(horizontal: 12),
+                labelPadding: const EdgeInsets.symmetric(horizontal: 12),
                 tabs: [
-                  Tab(text: "Keşfet"),
-                  Tab(text: "Takip"),
-                  Tab(text: "Arkadaşlar"),
+                  Tab(text: "kesfet".tr),
+                  Tab(text: "takip".tr),
+                  Tab(text: "arkadaslar_baslik".tr),
                 ],
               ),
             ),
@@ -166,6 +168,10 @@ class _FeedListState extends State<FeedList>
   List<String> _friendIds = [];
   List<String> _followingIds = [];
 
+  // Scroll Controller ve Buton Görünürlüğü
+  final ScrollController _scrollController = ScrollController();
+  bool _showBackToTopButton = false;
+
   @override
   bool get wantKeepAlive => true; // Sekme değişince listeyi koru
 
@@ -173,6 +179,26 @@ class _FeedListState extends State<FeedList>
   void initState() {
     super.initState();
     _fetchData();
+    _scrollController.addListener(() {
+      setState(() {
+        if (_scrollController.offset >= 400) {
+          _showBackToTopButton = true;
+        } else {
+          _showBackToTopButton = false;
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToTop() {
+    _scrollController.animateTo(0,
+        duration: const Duration(milliseconds: 500), curve: Curves.easeInOut);
   }
 
   Future<void> _fetchData() async {
@@ -227,7 +253,18 @@ class _FeedListState extends State<FeedList>
           .collection('posts')
           .where('parentID', isNull: true)
           .orderBy("createdAt", descending: true)
-          .limit(50);
+          .limit(15); // Sayfalama limiti düşürüldü (Maliyet Optimizasyonu)
+
+      // Keşfet modunda dil filtresi
+      if (widget.type == FeedType.explore) {
+        String langCode = Get.locale?.languageCode ?? 'tr';
+        // 'en_US' gibi gelenleri sadece 'en' olarak alalım, ama şimdilik basit tutalım
+        // Eğer veritabanına 'tr', 'en', 'de' diye kaydediyorsak:
+        // langCode = langCode.split('_')[0];
+        // Ancak GetX genelde 'tr_TR' veya 'en_US' verebilir, kontrol etmek lazım.
+        // Şimdilik direkt eşleşme yapalım, post oluştururken de aynısını kullanacağız.
+        query = query.where('language', isEqualTo: langCode);
+      }
 
       // Not: Firestore 'IN' sorgusu en fazla 10 veya 30 eleman destekler.
       // Arkadaş/Takipçi listesi uzunsa client-side filtreleme yapmak daha güvenlidir (şu anki yöntem).
@@ -265,7 +302,11 @@ class _FeedListState extends State<FeedList>
     } catch (e) {
       debugPrint("Post çekme hatası: $e");
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _errorMessage =
+              "Veriler yüklenirken hata oluştu: $e. \n\nEğer 'failed-precondition' hatası görüyorsanız, terminaldeki linke tıklayarak index oluşturmanız gerekebilir.";
+          _isLoading = false;
+        });
       }
     }
   }
@@ -293,25 +334,42 @@ class _FeedListState extends State<FeedList>
       return _buildEmptyState(widget.type);
     }
 
-    return RefreshIndicator(
-      onRefresh: _onRefresh,
-      color: Colors.cyanAccent,
-      backgroundColor: Colors.grey[900],
-      child: ListView.builder(
-        key: PageStorageKey(widget.type.toString()),
-        padding: const EdgeInsets.only(top: 8, bottom: 80),
-        itemCount: _posts.length,
-        itemBuilder: (context, index) {
-          final doc = _posts[index];
-          // ValueKey kullanarak performans optimizasyonu
-          return PostItem(
-            key: ValueKey(doc.id),
-            doc: doc,
-            index: index,
-            allDocs: _posts,
-          );
-        },
-      ),
+    return Stack(
+      children: [
+        RefreshIndicator(
+          onRefresh: _onRefresh,
+          color: Colors.cyanAccent,
+          backgroundColor: Colors.grey[900],
+          child: ListView.builder(
+            controller: _scrollController,
+            key: PageStorageKey(widget.type.toString()),
+            padding: const EdgeInsets.only(top: 8, bottom: 80),
+            itemCount: _posts.length,
+            itemBuilder: (context, index) {
+              final doc = _posts[index];
+              // ValueKey kullanarak performans optimizasyonu
+              return PostItem(
+                key: ValueKey(doc.id),
+                doc: doc,
+                index: index,
+                allDocs: _posts,
+              );
+            },
+          ),
+        ),
+        if (_showBackToTopButton)
+          Positioned(
+            bottom: 20,
+            left: 20,
+            child: FloatingActionButton(
+              mini: true,
+              onPressed: _scrollToTop,
+              backgroundColor: Colors.cyanAccent.withOpacity(0.8),
+              shape: const CircleBorder(),
+              child: const Icon(Icons.arrow_upward, color: Colors.black),
+            ),
+          ),
+      ],
     );
   }
 
@@ -445,11 +503,17 @@ class _PostItemState extends State<PostItem> {
                             onInteractionEnd: (details) {
                               _resetZoom();
                             },
-                            child: Image.network(
-                              mediaUrl,
+                            child: CachedNetworkImage(
+                              imageUrl: mediaUrl,
                               fit: BoxFit.cover,
                               width: double.infinity,
-                              errorBuilder: (context, error, stackTrace) =>
+                              placeholder: (context, url) => const SizedBox(
+                                height: 200,
+                                child: Center(
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2)),
+                              ),
+                              errorWidget: (context, url, error) =>
                                   const SizedBox(
                                       height: 200,
                                       child: Center(child: Icon(Icons.error))),

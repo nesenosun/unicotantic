@@ -2,8 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:unicotantic/core/models/post_model.dart';
@@ -171,14 +170,14 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                         SliverPersistentHeader(
                           pinned: true,
                           delegate: _SliverAppBarDelegate(
-                            const TabBar(
+                            TabBar(
                               indicatorColor: Colors.cyanAccent,
                               labelColor: Colors.cyanAccent,
                               unselectedLabelColor: Colors.grey,
                               tabs: [
-                                Tab(text: "Gönderiler"),
-                                Tab(text: "Yorumlar"),
-                                Tab(text: "Medya"),
+                                Tab(text: "gonderiler".tr),
+                                Tab(text: "yorumlar".tr),
+                                Tab(text: "medya".tr),
                               ],
                             ),
                           ),
@@ -280,7 +279,7 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    data?['name'] ?? user.displayName ?? "Kullanıcı",
+                    data?['name'] ?? user.displayName ?? "kullanici".tr,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -301,25 +300,27 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
                         width: 30,
                         child: Image.asset("assets/images/png/settings.png")),
                     itemBuilder: (BuildContext context) => [
-                      const PopupMenuItem<String>(
+                      PopupMenuItem<String>(
                         value: 'edit',
                         child: Row(
                           children: [
-                            Icon(Iconsax.edit, color: Colors.white, size: 20),
-                            SizedBox(width: 10),
-                            Text('Profili Düzenle',
-                                style: TextStyle(color: Colors.white)),
+                            const Icon(Iconsax.edit,
+                                color: Colors.white, size: 20),
+                            const SizedBox(width: 10),
+                            Text('profil_duzenle'.tr,
+                                style: const TextStyle(color: Colors.white)),
                           ],
                         ),
                       ),
-                      const PopupMenuItem<String>(
+                      PopupMenuItem<String>(
                         value: 'logout',
                         child: Row(
                           children: [
-                            Icon(Iconsax.logout, color: Colors.red, size: 20),
-                            SizedBox(width: 10),
-                            Text('Çıkış Yap',
-                                style: TextStyle(color: Colors.red)),
+                            const Icon(Iconsax.logout,
+                                color: Colors.red, size: 20),
+                            const SizedBox(width: 10),
+                            Text('oturumu_kapat'.tr,
+                                style: const TextStyle(color: Colors.red)),
                           ],
                         ),
                       ),
@@ -353,15 +354,15 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildStatColumn(postCountStr, "Gönderi"),
+                  _buildStatColumn(postCountStr, "gonderi".tr),
                   Container(width: 1, height: 30, color: Colors.grey[800]),
-                  _buildStatColumn(friendCount, "Arkadaşlar",
+                  _buildStatColumn(friendCount, "arkadaşlar".tr,
                       onTap: () => Get.to(() => const ArkadaslarPage())),
                   Container(width: 1, height: 30, color: Colors.grey[800]),
-                  _buildStatColumn(followerCount, "Takipçi",
+                  _buildStatColumn(followerCount, "takipci".tr,
                       onTap: () => Get.to(() => const TakipcilerPage())),
                   Container(width: 1, height: 30, color: Colors.grey[800]),
-                  _buildStatColumn(followingCount, "Takip",
+                  _buildStatColumn(followingCount, "takip".tr,
                       onTap: () => Get.to(() => const TakipEttiklerimPage())),
                 ],
               ),
@@ -396,8 +397,9 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
 
   Widget _buildFeedList(List<DocumentSnapshot> docs, User user) {
     if (docs.isEmpty) {
-      return const Center(
-        child: Text("Henüz bir şey yok.", style: TextStyle(color: Colors.grey)),
+      return Center(
+        child: Text("henuz_bir_sey_yok".tr,
+            style: const TextStyle(color: Colors.grey)),
       );
     }
 
@@ -470,8 +472,8 @@ class _KullaniciProfiliState extends State<KullaniciProfili> {
 
   Widget _buildMediaGrid(List<DocumentSnapshot> docs) {
     if (docs.isEmpty) {
-      return const Center(
-        child: Text("Medya yok.", style: TextStyle(color: Colors.grey)),
+      return Center(
+        child: Text("medya_yok".tr, style: const TextStyle(color: Colors.grey)),
       );
     }
 

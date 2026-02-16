@@ -10,7 +10,8 @@ import 'site.dart';
 import 'ziyaretci.dart';
 
 class TakipEttiklerimPage extends StatefulWidget {
-  const TakipEttiklerimPage({super.key});
+  final String? userId;
+  const TakipEttiklerimPage({super.key, this.userId});
 
   @override
   State<TakipEttiklerimPage> createState() => _TakipEttiklerimPageState();
@@ -20,13 +21,15 @@ class _TakipEttiklerimPageState extends State<TakipEttiklerimPage> {
   User? get currentUser => FirebaseAuth.instance.currentUser;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final SocialService _socialService = SocialService();
+  String? get targetUid => widget.userId ?? currentUser?.uid;
 
   @override
   Widget build(BuildContext context) {
     if (currentUser == null) {
       return const Scaffold(
         backgroundColor: Colors.black,
-        body: Center(child: CircularProgressIndicator(color: Colors.cyanAccent)),
+        body:
+            Center(child: CircularProgressIndicator(color: Colors.cyanAccent)),
       );
     }
 
@@ -38,58 +41,105 @@ class _TakipEttiklerimPageState extends State<TakipEttiklerimPage> {
           backgroundColor: Colors.black,
           appBar: AppBar(
             backgroundColor: Colors.black,
-            title: const Text('Takip Ettiklerim', style: TextStyle(color: Colors.white, fontSize: 18)),
+            title: Text(
+                widget.userId == null
+                    ? 'takip_ettiklerim_baslik'.tr
+                    : 'takip_ettikleri_baslik'.tr,
+                style: const TextStyle(color: Colors.white, fontSize: 18)),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Get.back(),
             ),
           ),
-          body: StreamBuilder<QuerySnapshot>(
-            stream: _firestore.collection('following').doc(currentUser!.uid).collection('userFollowing').snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasError)
-                return const Center(child: Text('Hata oluştu', style: TextStyle(color: Colors.white)));
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator(color: Colors.cyanAccent));
-              }
+          body: FutureBuilder<String>(
+            future: _socialService.getFriendshipStatus(
+                currentUser!.uid, targetUid!),
+            builder: (context, statusSnapshot) {
+              bool isFriend = statusSnapshot.data == 'friends';
+              bool isMe =
+                  widget.userId == null || widget.userId == currentUser!.uid;
 
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              if (!isMe && !isFriend) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Iconsax.people, size: 64, color: Colors.grey[700]),
+                      Icon(Iconsax.lock, size: 64, color: Colors.grey[700]),
                       const SizedBox(height: 16),
-                      Text('Henüz kimseyi takip etmiyorsun', style: TextStyle(color: Colors.grey[500])),
+                      Text('liste_gizli'.tr,
+                          style: TextStyle(color: Colors.grey[500])),
                     ],
                   ),
                 );
               }
 
-              return ListView.builder(
-                itemCount: snapshot.data!.docs.length,
-                itemBuilder: (context, index) {
-                  var doc = snapshot.data!.docs[index];
-                  String followedUserId = doc.id;
+              return StreamBuilder<QuerySnapshot>(
+                stream: _firestore
+                    .collection('following')
+                    .doc(targetUid)
+                    .collection('userFollowing')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError)
+                    return const Center(
+                        child: Text('Hata oluştu',
+                            style: TextStyle(color: Colors.white)));
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                        child: CircularProgressIndicator(
+                            color: Colors.cyanAccent));
+                  }
 
-                  return ListTile(
-                    onTap: () => Get.to(() => Ziyaretci(gelenKullaniciEmail: followedUserId)),
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.grey[900],
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: profilResmiGetir(followedUserId),
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Iconsax.people,
+                              size: 64, color: Colors.grey[700]),
+                          const SizedBox(height: 16),
+                          Text('kimseyi_takip_etmiyor'.tr,
+                              style: TextStyle(color: Colors.grey[500])),
+                        ],
                       ),
-                    ),
-                    title: profilIsmiGetir(followedUserId),
-                    subtitle: const Text('Takip ediliyor', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                    trailing: IconButton(
-                      icon: const Icon(Iconsax.user_minus, color: Colors.redAccent),
-                      onPressed: () async {
-                        await _socialService.unfollowUser(currentUser!.uid, followedUserId);
-                        Get.snackbar('Bilgi', 'Takipten çıkarıldı');
-                      },
-                    ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      var doc = snapshot.data!.docs[index];
+                      String followedUserId = doc.id;
+
+                      return ListTile(
+                        onTap: () => Get.to(() =>
+                            Ziyaretci(gelenKullaniciEmail: followedUserId)),
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.grey[900],
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: profilResmiGetir(followedUserId),
+                          ),
+                        ),
+                        title: profilIsmiGetir(followedUserId),
+                        subtitle: Text('takip_ediliyor'.tr,
+                            style: const TextStyle(
+                                color: Colors.grey, fontSize: 12)),
+                        trailing: widget.userId == null
+                            ? IconButton(
+                                icon: const Icon(Iconsax.user_minus,
+                                    color: Colors.redAccent),
+                                onPressed: () async {
+                                  await _socialService.unfollowUser(
+                                      currentUser!.uid, followedUserId);
+                                  Get.snackbar(
+                                      'Bilgi', 'takipten_cikarildi'.tr);
+                                },
+                              )
+                            : const Icon(Iconsax.arrow_right_3,
+                                color: Colors.grey, size: 18),
+                      );
+                    },
                   );
                 },
               );
@@ -108,8 +158,10 @@ class _TakipEttiklerimPageState extends State<TakipEttiklerimPage> {
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border(
-                        left: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
-                        right: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
+                        left: BorderSide(
+                            color: Colors.white.withOpacity(0.05), width: 1),
+                        right: BorderSide(
+                            color: Colors.white.withOpacity(0.05), width: 1),
                       ),
                     ),
                     child: content,

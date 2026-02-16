@@ -15,10 +15,16 @@ service cloud.firestore {
 
     // ===== KULLANICI PROFİLLERİ =====
     match /users/{userId} {
-      // Sadece giriş yapmış kullanıcılar okuyabilir (herkese açık değil)
+      // Sadece giriş yapmış kullanıcılar okuyabilir
       allow read: if isSignedIn();
-      // Sadece hesap sahibi kendi profilini yazabilir
-      allow write: if isOwner(userId);
+      // Sadece hesap sahibi kendi profilini oluşturabilir
+      allow create: if isOwner(userId);
+      // Sadece hesap sahibi TAM erişime sahip, diğerleri SADECE sayaçları ve engellenme durumunu güncelleyebilir
+      allow update: if isOwner(userId) 
+                   || (isSignedIn() && request.resource.data.diff(resource.data).affectedKeys()
+                      .hasOnly(['followerCount', 'followingCount', 'friendCount', 'notificationCount', 'blockedBy', 'unicBalance']));
+      // Sadece admin silebilir
+      allow delete: if isAdmin();
 
       // Alt koleksiyonlar (Unica hafızası vb.)
       match /{document=**} {

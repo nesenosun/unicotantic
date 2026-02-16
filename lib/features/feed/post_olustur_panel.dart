@@ -45,12 +45,27 @@ class _PostOlusturPanelState extends State<PostOlusturPanel> {
       Reference ref = FirebaseStorage.instance
           .ref()
           .child(folder)
-          .child(kullanici?.email ?? 'unknown')
+          .child(kullanici?.uid ?? 'unknown')
           .child(fileName);
 
       UploadTask task;
       if (kIsWeb) {
-        task = ref.putData(await pickedFile.readAsBytes());
+        Uint8List fileBytes = await pickedFile.readAsBytes();
+        int fileSizeInBytes = fileBytes.length;
+        double fileSizeInMb = fileSizeInBytes / (1024 * 1024);
+
+        // Web için boyut kontrolleri
+        if (type == 'video' && fileSizeInMb > 25) {
+          setState(() {
+            _isUploading = false;
+            _statusText = null;
+          });
+          Get.snackbar('Hata', 'Video boyutu 25 MB\'dan büyük olamaz.',
+              backgroundColor: Colors.red, colorText: Colors.white);
+          return;
+        }
+
+        task = ref.putData(fileBytes);
       } else {
         File file = File(pickedFile.path);
         int fileSizeInBytes = await file.length();
@@ -124,7 +139,7 @@ class _PostOlusturPanelState extends State<PostOlusturPanel> {
           return;
         }
       }
-      await _uploadMedia(pickedFile, 'postFotoları', 'image');
+      await _uploadMedia(pickedFile, 'postFotolari', 'image');
     }
   }
 
@@ -141,23 +156,24 @@ class _PostOlusturPanelState extends State<PostOlusturPanel> {
         final fileSizeInBytes = await file.length();
         final fileSizeInMb = fileSizeInBytes / (1024 * 1024);
 
-        if (fileSizeInMb > 50) {
+        if (fileSizeInMb > 25) {
           Get.snackbar(
             'Hata',
-            'Video boyutu 50 MB\'dan büyük olamaz. Mevcut boyut: ${fileSizeInMb.toStringAsFixed(1)} MB',
+            'Video boyutu 25 MB\'dan büyük olamaz. Seçilen: ${fileSizeInMb.toStringAsFixed(1)} MB',
             backgroundColor: Colors.red,
             colorText: Colors.white,
+            duration: const Duration(seconds: 4),
           );
           return;
         }
 
         // Süre kontrolü (VideoCompress ile daha kesin sonuç alınabilir ama picker da kısıtlıyor)
         final info = await VideoCompress.getMediaInfo(pickedFile.path);
-        if (info.duration != null && info.duration! > 120000) {
-          // 120000 ms = 2 dk
+        if (info.duration != null && info.duration! > 60000) {
+          // 60000 ms = 1 dk (Maliyet Optimizasyonu)
           Get.snackbar(
             'Hata',
-            'Video süresi 2 dakikadan uzun olamaz.',
+            'Video süresi 1 dakikadan uzun olamaz.',
             backgroundColor: Colors.red,
             colorText: Colors.white,
             duration: const Duration(seconds: 2),
@@ -230,6 +246,7 @@ class _PostOlusturPanelState extends State<PostOlusturPanel> {
         'mediaType': _mediaType ?? 'text',
         'parentID': widget.parentID,
         'rootID': widget.rootID ?? postID,
+        'language': Get.locale?.languageCode ?? 'tr',
       };
 
       await _firestore.collection('posts').doc(postID).set(postData);

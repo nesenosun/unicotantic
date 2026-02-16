@@ -9,7 +9,8 @@ import 'site.dart';
 import 'ziyaretci.dart';
 
 class TakipcilerPage extends StatefulWidget {
-  const TakipcilerPage({super.key});
+  final String? userId;
+  const TakipcilerPage({super.key, this.userId});
 
   @override
   State<TakipcilerPage> createState() => _TakipcilerPageState();
@@ -18,13 +19,15 @@ class TakipcilerPage extends StatefulWidget {
 class _TakipcilerPageState extends State<TakipcilerPage> {
   User? get currentUser => FirebaseAuth.instance.currentUser;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String? get targetUid => widget.userId ?? currentUser?.uid;
 
   @override
   Widget build(BuildContext context) {
     if (currentUser == null) {
       return const Scaffold(
         backgroundColor: Colors.black,
-        body: Center(child: CircularProgressIndicator(color: Colors.cyanAccent)),
+        body:
+            Center(child: CircularProgressIndicator(color: Colors.cyanAccent)),
       );
     }
 
@@ -36,19 +39,30 @@ class _TakipcilerPageState extends State<TakipcilerPage> {
           backgroundColor: Colors.black,
           appBar: AppBar(
             backgroundColor: Colors.black,
-            title: const Text('Takipçiler', style: TextStyle(color: Colors.white, fontSize: 18)),
+            title: Text(
+                widget.userId == null
+                    ? 'takipciler_baslik'.tr
+                    : 'takipceleri_baslik'.tr,
+                style: const TextStyle(color: Colors.white, fontSize: 18)),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Get.back(),
             ),
           ),
           body: StreamBuilder<QuerySnapshot>(
-            stream: _firestore.collection('followers').doc(currentUser!.uid).collection('userFollowers').snapshots(),
+            stream: _firestore
+                .collection('followers')
+                .doc(targetUid)
+                .collection('userFollowers')
+                .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError)
-                return const Center(child: Text('Hata oluştu', style: TextStyle(color: Colors.white)));
+                return const Center(
+                    child: Text('Hata oluştu',
+                        style: TextStyle(color: Colors.white)));
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator(color: Colors.cyanAccent));
+                return const Center(
+                    child: CircularProgressIndicator(color: Colors.cyanAccent));
               }
 
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
@@ -56,9 +70,11 @@ class _TakipcilerPageState extends State<TakipcilerPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Iconsax.profile_2user, size: 64, color: Colors.grey[700]),
+                      Icon(Iconsax.profile_2user,
+                          size: 64, color: Colors.grey[700]),
                       const SizedBox(height: 16),
-                      Text('Henüz takipçin bulunmuyor', style: TextStyle(color: Colors.grey[500])),
+                      Text('takipci_yok'.tr,
+                          style: TextStyle(color: Colors.grey[500])),
                     ],
                   ),
                 );
@@ -71,7 +87,8 @@ class _TakipcilerPageState extends State<TakipcilerPage> {
                   String followerId = doc.id;
 
                   return ListTile(
-                    onTap: () => Get.to(() => Ziyaretci(gelenKullaniciEmail: followerId)),
+                    onTap: () => Get.to(
+                        () => Ziyaretci(gelenKullaniciEmail: followerId)),
                     leading: CircleAvatar(
                       backgroundColor: Colors.grey[900],
                       child: ClipRRect(
@@ -80,8 +97,11 @@ class _TakipcilerPageState extends State<TakipcilerPage> {
                       ),
                     ),
                     title: profilIsmiGetir(followerId),
-                    subtitle: const Text('Seni takip ediyor', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                    trailing: const Icon(Iconsax.arrow_right_3, color: Colors.grey, size: 18),
+                    subtitle: Text('seni_takip_ediyor'.tr,
+                        style:
+                            const TextStyle(color: Colors.grey, fontSize: 12)),
+                    trailing: const Icon(Iconsax.arrow_right_3,
+                        color: Colors.grey, size: 18),
                   );
                 },
               );
@@ -100,8 +120,10 @@ class _TakipcilerPageState extends State<TakipcilerPage> {
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border(
-                        left: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
-                        right: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
+                        left: BorderSide(
+                            color: Colors.white.withOpacity(0.05), width: 1),
+                        right: BorderSide(
+                            color: Colors.white.withOpacity(0.05), width: 1),
                       ),
                     ),
                     child: content,

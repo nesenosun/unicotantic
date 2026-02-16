@@ -16,6 +16,9 @@ import 'full_screen_image_viewer.dart';
 import 'full_screen_video_player.dart';
 import 'kullanici_profili.dart';
 import 'site.dart';
+import 'arkadaslar.dart';
+import 'takipciler.dart';
+import 'takip_ettiklerim.dart';
 
 class Ziyaretci extends StatefulWidget {
   final String gelenKullaniciEmail;
@@ -39,7 +42,9 @@ class _ZiyaretciState extends State<Ziyaretci> {
     _scrollController.addListener(_onScroll);
 
     final user = currentUser;
-    if (user != null && (widget.gelenKullaniciEmail == user.email || widget.gelenKullaniciEmail == user.uid)) {
+    if (user != null &&
+        (widget.gelenKullaniciEmail == user.email ||
+            widget.gelenKullaniciEmail == user.uid)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Get.off(() => const KullaniciProfili());
       });
@@ -105,7 +110,8 @@ class _ZiyaretciState extends State<Ziyaretci> {
                 icon: const Icon(Iconsax.arrow_left, color: Colors.white),
                 onPressed: () => Navigator.pop(context),
               ),
-              title: const Text('Profil', style: TextStyle(color: Colors.white, fontSize: 18)),
+              title: Text('profil'.tr,
+                  style: const TextStyle(color: Colors.white, fontSize: 18)),
             ),
             drawer: isDesktop ? null : const Site(),
             bottomNavigationBar: isDesktop ? null : VoiceBottomBar(),
@@ -116,28 +122,37 @@ class _ZiyaretciState extends State<Ziyaretci> {
                     child: const Icon(Iconsax.arrow_up, color: Colors.black),
                   )
                 : null,
-            floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.startFloat,
             body: SafeArea(
               child: StreamBuilder<DocumentSnapshot>(
-                stream: firestore.collection('users').doc(widget.gelenKullaniciEmail).snapshots(),
+                stream: firestore
+                    .collection('users')
+                    .doc(widget.gelenKullaniciEmail)
+                    .snapshots(),
                 builder: (context, userSnapshot) {
                   if (!userSnapshot.hasData) return buildDefaultTextStyle();
                   if (!userSnapshot.data!.exists) {
-                    return const Center(
-                      child: Text("Kullanıcı bulunamadı.", style: TextStyle(color: Colors.white)),
+                    return Center(
+                      child: Text("kullanici_bulunamadi".tr,
+                          style: const TextStyle(color: Colors.white)),
                     );
                   }
 
-                  var userData = userSnapshot.data!.data() as Map<String, dynamic>?;
+                  var userData =
+                      userSnapshot.data!.data() as Map<String, dynamic>?;
                   if (userData == null) return buildDefaultTextStyle();
 
-                  bool beniEngelledi = (userData['blockedUsers'] ?? []).contains(user.uid);
-                  bool benEngelledim = (userData['blockedBy'] ?? []).contains(user.uid);
+                  bool beniEngelledi =
+                      (userData['blockedUsers'] ?? []).contains(user.uid);
+                  bool benEngelledim =
+                      (userData['blockedBy'] ?? []).contains(user.uid);
 
                   return StreamBuilder<QuerySnapshot>(
                     stream: firestore
                         .collection('posts')
-                        .where('authorID', isEqualTo: widget.gelenKullaniciEmail)
+                        .where('authorID',
+                            isEqualTo: widget.gelenKullaniciEmail)
                         .snapshots(),
                     builder: (context, postSnapshot) {
                       if (!postSnapshot.hasData) return buildDefaultTextStyle();
@@ -157,7 +172,9 @@ class _ZiyaretciState extends State<Ziyaretci> {
                       final mediaPosts = docs.where((d) {
                         var data = d.data() as Map<String, dynamic>;
                         var post = PostModel.fromMap(data);
-                        return post.mediaUrl != null && post.mediaUrl!.isNotEmpty && post.mediaUrl != 'bos';
+                        return post.mediaUrl != null &&
+                            post.mediaUrl!.isNotEmpty &&
+                            post.mediaUrl != 'bos';
                       }).toList();
 
                       return NestedScrollView(
@@ -167,13 +184,18 @@ class _ZiyaretciState extends State<Ziyaretci> {
                             SliverToBoxAdapter(
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                height: _headerHeight > 0.3 ? (320 * _headerHeight).clamp(0.0, 350.0) : 0,
+                                height: _headerHeight > 0.3
+                                    ? (320 * _headerHeight).clamp(0.0, 350.0)
+                                    : 0,
                                 child: _headerHeight > 0.3
                                     ? SingleChildScrollView(
-                                        physics: const NeverScrollableScrollPhysics(),
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
                                         child: Opacity(
-                                          opacity: ((_headerHeight - 0.3) / 0.7).clamp(0.0, 1.0),
-                                          child: _buildVisitorHeader(userData, posts.length, user.uid),
+                                          opacity: ((_headerHeight - 0.3) / 0.7)
+                                              .clamp(0.0, 1.0),
+                                          child: _buildVisitorHeader(
+                                              userData, posts.length, user.uid),
                                         ),
                                       )
                                     : const SizedBox.shrink(),
@@ -182,14 +204,14 @@ class _ZiyaretciState extends State<Ziyaretci> {
                             SliverPersistentHeader(
                               pinned: true,
                               delegate: _SliverAppBarDelegate(
-                                const TabBar(
+                                TabBar(
                                   indicatorColor: Colors.cyanAccent,
                                   labelColor: Colors.cyanAccent,
                                   unselectedLabelColor: Colors.grey,
                                   tabs: [
-                                    Tab(text: "Gönderiler"),
-                                    Tab(text: "Yorumlar"),
-                                    Tab(text: "Medya"),
+                                    Tab(text: "gonderiler".tr),
+                                    Tab(text: "yorumlar".tr),
+                                    Tab(text: "medya".tr),
                                   ],
                                 ),
                               ),
@@ -201,11 +223,15 @@ class _ZiyaretciState extends State<Ziyaretci> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Iconsax.user_minus, color: Colors.redAccent, size: 50),
+                                    Icon(Iconsax.user_minus,
+                                        color: Colors.redAccent, size: 50),
                                     const SizedBox(height: 16),
                                     Text(
-                                      beniEngelledi ? "Bu kullanıcı sizi engelledi." : "Bu kullanıcıyı engellediniz.",
-                                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                                      beniEngelledi
+                                          ? "engellendi_mesaji".tr
+                                          : "engelledin_mesaji".tr,
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 16),
                                     ),
                                   ],
                                 ),
@@ -237,8 +263,10 @@ class _ZiyaretciState extends State<Ziyaretci> {
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border(
-                        left: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
-                        right: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
+                        left: BorderSide(
+                            color: Colors.white.withOpacity(0.05), width: 1),
+                        right: BorderSide(
+                            color: Colors.white.withOpacity(0.05), width: 1),
                       ),
                     ),
                     child: content,
@@ -255,7 +283,8 @@ class _ZiyaretciState extends State<Ziyaretci> {
     );
   }
 
-  Widget _buildVisitorHeader(Map<String, dynamic> userData, int postCount, String currentUserId) {
+  Widget _buildVisitorHeader(
+      Map<String, dynamic> userData, int postCount, String currentUserId) {
     String? photoUrl = userData['photoUrl'];
     int postCountVal = userData['postCount'] ?? postCount;
     int friendCount = userData['friendCount'] ?? 0;
@@ -287,7 +316,8 @@ class _ZiyaretciState extends State<Ziyaretci> {
           ),
           const SizedBox(height: 12),
           FutureBuilder<String>(
-            future: _socialService.getFriendshipStatus(currentUserId, userData['uid'] ?? widget.gelenKullaniciEmail),
+            future: _socialService.getFriendshipStatus(
+                currentUserId, userData['uid'] ?? widget.gelenKullaniciEmail),
             builder: (context, statusSnapshot) {
               String status = statusSnapshot.data ?? 'none';
               return Row(
@@ -296,7 +326,8 @@ class _ZiyaretciState extends State<Ziyaretci> {
                   if (status == 'friends')
                     const Padding(
                       padding: EdgeInsets.only(right: 8.0),
-                      child: Icon(Iconsax.user_tick, color: Colors.cyanAccent, size: 20),
+                      child: Icon(Iconsax.user_tick,
+                          color: Colors.cyanAccent, size: 20),
                     ),
                   Text(
                     userData['name'] ?? userData['displayName'] ?? "Kullanıcı",
@@ -309,9 +340,12 @@ class _ZiyaretciState extends State<Ziyaretci> {
                   const SizedBox(width: 8),
                   FutureBuilder<Map<String, bool>>(
                     future: Future.wait<bool>([
-                      _socialService.isMuted(currentUserId, userData['uid'] ?? widget.gelenKullaniciEmail),
-                      _socialService.isBlocked(currentUserId, userData['uid'] ?? widget.gelenKullaniciEmail),
-                      _socialService.isFollowing(currentUserId, userData['uid'] ?? widget.gelenKullaniciEmail),
+                      _socialService.isMuted(currentUserId,
+                          userData['uid'] ?? widget.gelenKullaniciEmail),
+                      _socialService.isBlocked(currentUserId,
+                          userData['uid'] ?? widget.gelenKullaniciEmail),
+                      _socialService.isFollowing(currentUserId,
+                          userData['uid'] ?? widget.gelenKullaniciEmail),
                     ]).then((results) => {
                           'isMuted': results[0],
                           'isBlocked': results[1],
@@ -319,60 +353,79 @@ class _ZiyaretciState extends State<Ziyaretci> {
                         }),
                     builder: (context, socialSnap) {
                       bool isMutedStatus = socialSnap.data?['isMuted'] ?? false;
-                      bool isBlockedStatus = socialSnap.data?['isBlocked'] ?? false;
-                      bool isFollowingStatus = socialSnap.data?['isFollowing'] ?? false;
+                      bool isBlockedStatus =
+                          socialSnap.data?['isBlocked'] ?? false;
+                      bool isFollowingStatus =
+                          socialSnap.data?['isFollowing'] ?? false;
 
                       return PopupMenuButton<String>(
                         onSelected: (value) async {
-                          final targetUid = userData['uid'] ?? widget.gelenKullaniciEmail;
+                          final targetUid =
+                              userData['uid'] ?? widget.gelenKullaniciEmail;
                           if (value == 'unfollow') {
-                            await _socialService.unfollowUser(currentUserId, targetUid);
-                            Get.snackbar('Bilgi', 'Takibi bıraktınız');
+                            await _socialService.unfollowUser(
+                                currentUserId, targetUid);
+                            Get.snackbar('bilgi'.tr, 'takibi_biraktin'.tr);
                             setState(() {});
                           } else if (value == 'remove_friend') {
                             _showRemoveFriendDialog(targetUid, currentUserId);
                           } else if (value == 'mute') {
                             if (isMutedStatus) {
-                              await _socialService.unmuteUser(currentUserId, targetUid);
-                              Get.snackbar('Bilgi', 'Kullanıcının sesi açıldı.');
+                              await _socialService.unmuteUser(
+                                  currentUserId, targetUid);
+                              Get.snackbar('bilgi'.tr, 'ses_acildi'.tr);
                             } else {
-                              await _socialService.muteUser(currentUserId, targetUid);
-                              Get.snackbar('Bilgi', 'Kullanıcı sessize alındı.');
+                              await _socialService.muteUser(
+                                  currentUserId, targetUid);
+                              Get.snackbar('bilgi'.tr, 'sessize_alindi'.tr);
                             }
                             setState(() {});
                           } else if (value == 'block') {
                             if (isBlockedStatus) {
-                              await _socialService.unblockUser(currentUserId, targetUid);
-                              Get.snackbar('Bilgi', 'Kullanıcının engeli kaldırıldı.');
+                              await _socialService.unblockUser(
+                                  currentUserId, targetUid);
+                              Get.snackbar('bilgi'.tr, 'engel_kaldirildi'.tr);
                             } else {
-                              await _socialService.blockUser(currentUserId, targetUid);
-                              Get.snackbar('Bilgi', 'Kullanıcı engellendi.');
+                              await _socialService.blockUser(
+                                  currentUserId, targetUid);
+                              Get.snackbar(
+                                  'bilgi'.tr, 'kullanici_engellendi'.tr);
                             }
                             setState(() {});
                           }
                         },
                         color: Colors.grey[900],
-                        icon: SizedBox(height: 25, width: 25, child: Image.asset("assets/images/png/settings.png")),
+                        icon: SizedBox(
+                            height: 25,
+                            width: 25,
+                            child:
+                                Image.asset("assets/images/png/settings.png")),
                         itemBuilder: (context) => [
                           if (isFollowingStatus)
-                            const PopupMenuItem<String>(
+                            PopupMenuItem<String>(
                               value: 'unfollow',
                               child: Row(
                                 children: [
-                                  Icon(Iconsax.user_minus, color: Colors.white, size: 20),
-                                  SizedBox(width: 10),
-                                  Text('Takibi Bırak', style: TextStyle(color: Colors.white)),
+                                  const Icon(Iconsax.user_minus,
+                                      color: Colors.white, size: 20),
+                                  const SizedBox(width: 10),
+                                  Text('takibi_birak'.tr,
+                                      style:
+                                          const TextStyle(color: Colors.white)),
                                 ],
                               ),
                             ),
                           if (status == 'friends')
-                            const PopupMenuItem<String>(
+                            PopupMenuItem<String>(
                               value: 'remove_friend',
                               child: Row(
                                 children: [
-                                  Icon(Iconsax.user_remove, color: Colors.white, size: 20),
-                                  SizedBox(width: 10),
-                                  Text('Arkadaşlarımdan Çıkar', style: TextStyle(color: Colors.white)),
+                                  const Icon(Iconsax.user_remove,
+                                      color: Colors.white, size: 20),
+                                  const SizedBox(width: 10),
+                                  Text('arkadastan_cikar'.tr,
+                                      style:
+                                          const TextStyle(color: Colors.white)),
                                 ],
                               ),
                             ),
@@ -380,11 +433,19 @@ class _ZiyaretciState extends State<Ziyaretci> {
                             value: 'mute',
                             child: Row(
                               children: [
-                                Icon(isMutedStatus ? Iconsax.volume_high : Iconsax.volume_cross,
-                                    color: Colors.white, size: 20),
+                                Icon(
+                                    isMutedStatus
+                                        ? Iconsax.volume_high
+                                        : Iconsax.volume_cross,
+                                    color: Colors.white,
+                                    size: 20),
                                 const SizedBox(width: 10),
-                                Text(isMutedStatus ? 'Sesi Aç' : 'Sessize Al',
-                                    style: const TextStyle(color: Colors.white)),
+                                Text(
+                                    isMutedStatus
+                                        ? 'sesi_ac'.tr
+                                        : 'sessize_al'.tr,
+                                    style:
+                                        const TextStyle(color: Colors.white)),
                               ],
                             ),
                           ),
@@ -392,11 +453,23 @@ class _ZiyaretciState extends State<Ziyaretci> {
                             value: 'block',
                             child: Row(
                               children: [
-                                Icon(isBlockedStatus ? Iconsax.user_tick : Iconsax.user_minus,
-                                    color: isBlockedStatus ? Colors.green : Colors.red, size: 20),
+                                Icon(
+                                    isBlockedStatus
+                                        ? Iconsax.user_tick
+                                        : Iconsax.user_minus,
+                                    color: isBlockedStatus
+                                        ? Colors.green
+                                        : Colors.red,
+                                    size: 20),
                                 const SizedBox(width: 10),
-                                Text(isBlockedStatus ? 'Engeli Kaldır' : 'Engelle',
-                                    style: TextStyle(color: isBlockedStatus ? Colors.green : Colors.red)),
+                                Text(
+                                    isBlockedStatus
+                                        ? 'engeli_kaldir'.tr
+                                        : 'engelle'.tr,
+                                    style: TextStyle(
+                                        color: isBlockedStatus
+                                            ? Colors.green
+                                            : Colors.red)),
                               ],
                             ),
                           ),
@@ -434,22 +507,39 @@ class _ZiyaretciState extends State<Ziyaretci> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildStatColumn(postCountVal.toString(), "Gönderi"),
-              Container(width: 1, height: 30, color: Colors.grey[800]),
-              _buildStatColumn(friendCount.toString(), "Arkadaşlar"),
-              Container(width: 1, height: 30, color: Colors.grey[800]),
-              _buildStatColumn((userData['followerCount'] ?? 0).toString(), "Takipçi"),
+              _buildStatColumn(postCountVal.toString(), "gonderi".tr),
+              _buildStatColumn(friendCount.toString(), "arkadaşlar".tr,
+                  onTap: () {
+                Get.to(() => ArkadaslarPage(
+                    userId: userData['uid'] ?? widget.gelenKullaniciEmail));
+              }),
+              _buildStatColumn(
+                  (userData['followerCount'] ?? 0).toString(), "takipci".tr,
+                  onTap: () {
+                Get.to(() => TakipcilerPage(
+                    userId: userData['uid'] ?? widget.gelenKullaniciEmail));
+              }),
+              _buildStatColumn(
+                  (userData['followingCount'] ?? 0).toString(), "takip".tr,
+                  onTap: () {
+                Get.to(() => TakipEttiklerimPage(
+                    userId: userData['uid'] ?? widget.gelenKullaniciEmail));
+              }),
             ],
           ),
           const SizedBox(height: 16),
           FutureBuilder<List<dynamic>>(
             future: Future.wait([
-              _socialService.getFriendshipStatus(currentUserId, userData['uid'] ?? widget.gelenKullaniciEmail),
-              _socialService.isFollowing(currentUserId, userData['uid'] ?? widget.gelenKullaniciEmail),
+              _socialService.getFriendshipStatus(
+                  currentUserId, userData['uid'] ?? widget.gelenKullaniciEmail),
+              _socialService.isFollowing(
+                  currentUserId, userData['uid'] ?? widget.gelenKullaniciEmail),
             ]),
             builder: (context, snapshot) {
-              final friendshipStatus = snapshot.data != null ? snapshot.data![0].toString() : 'none';
-              final isFollowingStatus = snapshot.data != null ? snapshot.data![1] as bool : false;
+              final friendshipStatus =
+                  snapshot.data != null ? snapshot.data![0].toString() : 'none';
+              final isFollowingStatus =
+                  snapshot.data != null ? snapshot.data![1] as bool : false;
 
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -458,18 +548,25 @@ class _ZiyaretciState extends State<Ziyaretci> {
                     Padding(
                       padding: const EdgeInsets.only(right: 12.0),
                       child: IconButton(
-                        onPressed: () =>
-                            Get.to(() => ChatScreen(peerId: userData['uid'] ?? widget.gelenKullaniciEmail)),
-                        icon: const Icon(Iconsax.message, color: Colors.cyanAccent, size: 28),
-                        tooltip: 'Mesaj Gönder',
+                        onPressed: () => Get.to(() => ChatScreen(
+                            peerId:
+                                userData['uid'] ?? widget.gelenKullaniciEmail)),
+                        icon: const Icon(Iconsax.message,
+                            color: Colors.cyanAccent, size: 28),
+                        tooltip: 'mesaj_gonder'.tr,
                       ),
                     ),
                   if (friendshipStatus != 'friends')
                     _buildFriendshipButton(
-                        friendshipStatus, userData['uid'] ?? widget.gelenKullaniciEmail, currentUserId),
+                        friendshipStatus,
+                        userData['uid'] ?? widget.gelenKullaniciEmail,
+                        currentUserId),
                   if (friendshipStatus != 'friends') const SizedBox(width: 12),
                   if (!isFollowingStatus)
-                    _buildFollowButton(isFollowingStatus, userData['uid'] ?? widget.gelenKullaniciEmail, currentUserId),
+                    _buildFollowButton(
+                        isFollowingStatus,
+                        userData['uid'] ?? widget.gelenKullaniciEmail,
+                        currentUserId),
                 ],
               );
             },
@@ -480,15 +577,16 @@ class _ZiyaretciState extends State<Ziyaretci> {
   }
 
   // Helper metodlar
-  Widget _buildFollowButton(bool isFollowing, String otherUserId, String currentUserId) {
+  Widget _buildFollowButton(
+      bool isFollowing, String otherUserId, String currentUserId) {
     return GestureDetector(
       onTap: () async {
         if (isFollowing) {
           await _socialService.unfollowUser(currentUserId, otherUserId);
-          Get.snackbar('Bilgi', 'Takibi bıraktınız');
+          Get.snackbar('bilgi'.tr, 'takibi_biraktin'.tr);
         } else {
           await _socialService.followUser(currentUserId, otherUserId);
-          Get.snackbar('Bilgi', 'Takip etmeye başladınız');
+          Get.snackbar('bilgi'.tr, 'takip_etmeye_basladin'.tr);
         }
         setState(() {});
       },
@@ -497,10 +595,12 @@ class _ZiyaretciState extends State<Ziyaretci> {
         decoration: BoxDecoration(
           color: isFollowing ? Colors.transparent : Colors.cyanAccent,
           borderRadius: BorderRadius.circular(20),
-          border: isFollowing ? Border.all(color: Colors.cyanAccent.withOpacity(0.5)) : null,
+          border: isFollowing
+              ? Border.all(color: Colors.cyanAccent.withOpacity(0.5))
+              : null,
         ),
         child: Text(
-          isFollowing ? "Takibi Bırak" : "Takip Et",
+          isFollowing ? "takibi_birak".tr : "takip_et".tr,
           style: TextStyle(
             color: isFollowing ? Colors.cyanAccent : Colors.black,
             fontSize: 13,
@@ -511,8 +611,9 @@ class _ZiyaretciState extends State<Ziyaretci> {
     );
   }
 
-  Widget _buildFriendshipButton(String status, String otherUserId, String currentUserId) {
-    String text = "Arkadaş Ekle";
+  Widget _buildFriendshipButton(
+      String status, String otherUserId, String currentUserId) {
+    String text = "arkadas_ekle".tr;
     Color bgColor = Colors.grey[900]!;
     Color textColor = Colors.white;
     VoidCallback? onTap;
@@ -520,18 +621,21 @@ class _ZiyaretciState extends State<Ziyaretci> {
     if (status == 'friends') {
       return const SizedBox.shrink();
     } else if (status == 'request_sent') {
-      text = "İstek Gönderildi";
+      text = "istek_gonderildi".tr;
       bgColor = Colors.orange.withOpacity(0.2);
       textColor = Colors.orange;
-      onTap = () => _socialService.declineFriendRequest(otherUserId, currentUserId);
+      onTap =
+          () => _socialService.declineFriendRequest(otherUserId, currentUserId);
     } else if (status == 'request_received') {
-      text = "İsteği Onayla";
+      text = "istegi_onayla".tr;
       bgColor = Colors.cyanAccent.withOpacity(0.2);
       textColor = Colors.cyanAccent;
-      onTap = () => _socialService.acceptFriendRequest(currentUserId, otherUserId);
+      onTap =
+          () => _socialService.acceptFriendRequest(currentUserId, otherUserId);
     } else {
-      text = "Arkadaş Ekle";
-      onTap = () => _socialService.sendFriendRequest(currentUserId, otherUserId);
+      text = "arkadas_ekle".tr;
+      onTap =
+          () => _socialService.sendFriendRequest(currentUserId, otherUserId);
     }
 
     return GestureDetector(
@@ -550,7 +654,8 @@ class _ZiyaretciState extends State<Ziyaretci> {
         ),
         child: Text(
           text,
-          style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: textColor, fontSize: 13, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -558,13 +663,13 @@ class _ZiyaretciState extends State<Ziyaretci> {
 
   void _showRemoveFriendDialog(String friendId, String currentUserId) {
     Get.defaultDialog(
-      title: "Arkadaşı Çıkar",
-      middleText: "Bu kişiyi arkadaş listenizden çıkarmak istediğinize emin misiniz?",
+      title: "arkadasi_cikar_baslik".tr,
+      middleText: "arkadasi_cikar_icerik".tr,
       backgroundColor: Colors.grey[900],
       titleStyle: const TextStyle(color: Colors.white),
       middleTextStyle: const TextStyle(color: Colors.white70),
-      textConfirm: "Çıkar",
-      textCancel: "Vazgeç",
+      textConfirm: "cikar".tr,
+      textCancel: "vazgec".tr,
       onConfirm: () {
         _socialService.removeFriend(currentUserId, friendId);
         Get.back();
@@ -597,8 +702,9 @@ class _ZiyaretciState extends State<Ziyaretci> {
 
   Widget _buildPostList(List<DocumentSnapshot> docs) {
     if (docs.isEmpty) {
-      return const Center(
-        child: Text("Henüz bir şey yok.", style: TextStyle(color: Colors.grey)),
+      return Center(
+        child: Text("henuz_bir_sey_yok".tr,
+            style: const TextStyle(color: Colors.grey)),
       );
     }
 
@@ -632,12 +738,15 @@ class _ZiyaretciState extends State<Ziyaretci> {
                   index: index,
                 ),
                 PostContentText(content: post.text),
-                if (post.mediaUrl != null && post.mediaUrl != 'bos' && post.mediaUrl != '')
+                if (post.mediaUrl != null &&
+                    post.mediaUrl != 'bos' &&
+                    post.mediaUrl != '')
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: Card(
                       clipBehavior: Clip.antiAlias,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
                       child: post.mediaType == 'video'
                           ? FeedVideoPlayer(videoUrl: post.mediaUrl!)
                           : Image.network(
@@ -645,7 +754,9 @@ class _ZiyaretciState extends State<Ziyaretci> {
                               fit: BoxFit.cover,
                               width: double.infinity,
                               errorBuilder: (context, error, stackTrace) =>
-                                  const SizedBox(height: 200, child: Center(child: Icon(Icons.error))),
+                                  const SizedBox(
+                                      height: 200,
+                                      child: Center(child: Icon(Icons.error))),
                             ),
                     ),
                   ),
@@ -666,8 +777,8 @@ class _ZiyaretciState extends State<Ziyaretci> {
 
   Widget _buildMediaGrid(List<DocumentSnapshot> docs) {
     if (docs.isEmpty) {
-      return const Center(
-        child: Text("Medya yok.", style: TextStyle(color: Colors.grey)),
+      return Center(
+        child: Text("medya_yok".tr, style: const TextStyle(color: Colors.grey)),
       );
     }
 
@@ -690,14 +801,16 @@ class _ZiyaretciState extends State<Ziyaretci> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FullScreenImageViewer(imageUrl: post.mediaUrl!),
+                  builder: (context) =>
+                      FullScreenImageViewer(imageUrl: post.mediaUrl!),
                 ),
               );
             } else {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FullScreenVideoPlayer(videoUrl: post.mediaUrl!),
+                  builder: (context) =>
+                      FullScreenVideoPlayer(videoUrl: post.mediaUrl!),
                 ),
               );
             }
@@ -734,7 +847,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       color: Colors.black,
       child: _tabBar,

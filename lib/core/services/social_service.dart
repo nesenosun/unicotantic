@@ -81,6 +81,16 @@ class SocialService {
     return snapshot.docs.map((doc) => doc.id).toList();
   }
 
+  Future<List<String>> getFollowerIds(String userId) async {
+    final snapshot = await _firestore
+        .collection('followers')
+        .doc(userId)
+        .collection('userFollowers')
+        .get();
+
+    return snapshot.docs.map((doc) => doc.id).toList();
+  }
+
   // --- BEĞENİ VE DİSLİKE SİSTEMİ ---
 
   Future<void> toggleLike(String uid, String postId) async {

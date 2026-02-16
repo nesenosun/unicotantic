@@ -10,6 +10,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:get_storage/get_storage.dart';
+
 import '../../core/voice/widgets/voice_bottom_bar.dart';
 import '../auth/splash.dart';
 import 'admin_sayfasi.dart';
@@ -56,7 +58,7 @@ class _AyarlarState extends State<Ayarlar> {
 
   Future<void> _checkUsername(String val) async {
     if (val.isEmpty) {
-      setState(() => _usernameError = "Kullanıcı adı boş olamaz.");
+      setState(() => _usernameError = 'kullanici_adi_bos'.tr);
       return;
     }
     if (val == _oldUsername) {
@@ -64,7 +66,7 @@ class _AyarlarState extends State<Ayarlar> {
       return;
     }
     if (!RegExp(r'^[a-z0-9_]{3,20}$').hasMatch(val)) {
-      setState(() => _usernameError = "Sadece küçük harf, rakam ve alt çizgi (3-20 krkt).");
+      setState(() => _usernameError = 'kullanici_adi_kural'.tr);
       return;
     }
 
@@ -73,7 +75,7 @@ class _AyarlarState extends State<Ayarlar> {
     setState(() {
       _isCheckingUsername = false;
       if (doc.exists) {
-        _usernameError = "Bu kullanıcı adı zaten alınmış.";
+        _usernameError = 'kullanici_adi_alinmis'.tr;
       } else {
         _usernameError = null;
       }
@@ -100,7 +102,11 @@ class _AyarlarState extends State<Ayarlar> {
     setState(() => _isSaving = true);
     try {
       String fileName = 'profile_${kullanici.uid}.jpg';
-      Reference ref = FirebaseStorage.instance.ref().child('profilePhotos').child(kullanici.uid).child(fileName);
+      Reference ref = FirebaseStorage.instance
+          .ref()
+          .child('profilePhotos')
+          .child(kullanici.uid)
+          .child(fileName);
 
       if (kIsWeb) {
         await ref.putData(await pickedFile.readAsBytes());
@@ -110,16 +116,19 @@ class _AyarlarState extends State<Ayarlar> {
 
       String url = await ref.getDownloadURL();
       await kullanici.updatePhotoURL(url);
-      await _firestore.collection('users').doc(kullanici.uid).update({'photoUrl': url});
+      await _firestore
+          .collection('users')
+          .doc(kullanici.uid)
+          .update({'photoUrl': url});
 
       setState(() {
         _currentPhotoUrl = url;
         _isSaving = false;
       });
-      Get.snackbar('Başarılı', 'Profil fotoğrafı güncellendi.');
+      Get.snackbar('basarili'.tr, 'fotograf_guncellendi'.tr);
     } catch (e) {
       setState(() => _isSaving = false);
-      Get.snackbar('Hata', 'Fotoğraf yüklenemedi: $e');
+      Get.snackbar('hata'.tr, "${'fotograf_yuklenemedi'.tr}$e");
     }
   }
 
@@ -128,11 +137,11 @@ class _AyarlarState extends State<Ayarlar> {
     final newName = _nameController.text.trim();
 
     if (newName.isEmpty || newUsername.isEmpty) {
-      Get.snackbar('Hata', 'İsim ve kullanıcı adı boş olamaz.');
+      Get.snackbar('hata'.tr, 'isim_kullanici_bos'.tr);
       return;
     }
     if (_usernameError != null) {
-      Get.snackbar('Hata', 'Lütfen geçerli bir kullanıcı adı seçin.');
+      Get.snackbar('hata'.tr, 'gecerli_kullanici_adi'.tr);
       return;
     }
 
@@ -140,7 +149,10 @@ class _AyarlarState extends State<Ayarlar> {
 
     try {
       if (newUsername != _oldUsername) {
-        await _firestore.collection('usernames').doc(newUsername).set({'uid': kullanici.uid});
+        await _firestore
+            .collection('usernames')
+            .doc(newUsername)
+            .set({'uid': kullanici.uid});
         if (_oldUsername != null && _oldUsername!.isNotEmpty) {
           await _firestore.collection('usernames').doc(_oldUsername).delete();
         }
@@ -148,7 +160,11 @@ class _AyarlarState extends State<Ayarlar> {
 
       if (!kIsWeb && _imageFile != null) {
         String fileName = 'profile_${kullanici.uid}.jpg';
-        Reference ref = FirebaseStorage.instance.ref().child('profilePhotos').child(kullanici.uid).child(fileName);
+        Reference ref = FirebaseStorage.instance
+            .ref()
+            .child('profilePhotos')
+            .child(kullanici.uid)
+            .child(fileName);
         await ref.putFile(_imageFile!);
         _currentPhotoUrl = await ref.getDownloadURL();
         await kullanici.updatePhotoURL(_currentPhotoUrl);
@@ -163,9 +179,9 @@ class _AyarlarState extends State<Ayarlar> {
       });
 
       _oldUsername = newUsername;
-      Get.snackbar('Başarılı', 'Profil bilgileriniz kaydedildi.');
+      Get.snackbar('basarili'.tr, 'profil_kaydedildi'.tr);
     } catch (e) {
-      Get.snackbar('Hata', 'Güncelleme hatası: $e');
+      Get.snackbar('hata'.tr, "${'hata'.tr}: $e");
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -178,7 +194,7 @@ class _AyarlarState extends State<Ayarlar> {
       await FirebaseAuth.instance.signOut();
       Get.offAll(() => const Splash());
     } catch (e) {
-      Get.snackbar('Hata', 'Çıkış yapılamadı.');
+      Get.snackbar('hata'.tr, 'cikis_yapilamadi'.tr);
     }
   }
 
@@ -191,7 +207,9 @@ class _AyarlarState extends State<Ayarlar> {
         Widget content = Scaffold(
           backgroundColor: Colors.black,
           drawer: isDesktop ? null : Site(),
-          bottomNavigationBar: isDesktop ? null : VoiceBottomBar(currentTab: VoiceBottomBarTab.profile),
+          bottomNavigationBar: isDesktop
+              ? null
+              : VoiceBottomBar(currentTab: VoiceBottomBarTab.profile),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -204,16 +222,25 @@ class _AyarlarState extends State<Ayarlar> {
                         height: 120,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.cyanAccent, width: 3),
+                          border:
+                              Border.all(color: Colors.cyanAccent, width: 3),
                           boxShadow: [
-                            BoxShadow(color: Colors.cyanAccent.withOpacity(0.2), blurRadius: 20, spreadRadius: 5)
+                            BoxShadow(
+                                color: Colors.cyanAccent.withOpacity(0.2),
+                                blurRadius: 20,
+                                spreadRadius: 5)
                           ],
                         ),
                         child: _imageFile != null
-                            ? CircleAvatar(backgroundImage: FileImage(_imageFile!))
-                            : (_currentPhotoUrl != null && _currentPhotoUrl!.isNotEmpty
-                                ? CircleAvatar(backgroundImage: NetworkImage(_currentPhotoUrl!))
-                                : const Icon(Iconsax.user, color: Colors.white, size: 60)),
+                            ? CircleAvatar(
+                                backgroundImage: FileImage(_imageFile!))
+                            : (_currentPhotoUrl != null &&
+                                    _currentPhotoUrl!.isNotEmpty
+                                ? CircleAvatar(
+                                    backgroundImage:
+                                        NetworkImage(_currentPhotoUrl!))
+                                : const Icon(Iconsax.user,
+                                    color: Colors.white, size: 60)),
                       ),
                       Positioned(
                         bottom: 0,
@@ -222,8 +249,11 @@ class _AyarlarState extends State<Ayarlar> {
                           onTap: _pickImage,
                           child: Container(
                             padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(color: Colors.cyanAccent, shape: BoxShape.circle),
-                            child: const Icon(Iconsax.camera, color: Colors.black, size: 20),
+                            decoration: const BoxDecoration(
+                                color: Colors.cyanAccent,
+                                shape: BoxShape.circle),
+                            child: const Icon(Iconsax.camera,
+                                color: Colors.black, size: 20),
                           ),
                         ),
                       ),
@@ -234,7 +264,7 @@ class _AyarlarState extends State<Ayarlar> {
                 TextField(
                   controller: _nameController,
                   style: const TextStyle(color: Colors.white),
-                  decoration: _inputDecoration('İsim Soyisim', Iconsax.user),
+                  decoration: _inputDecoration('isim_soyisim'.tr, Iconsax.user),
                 ),
                 const SizedBox(height: 15),
                 TextField(
@@ -242,15 +272,18 @@ class _AyarlarState extends State<Ayarlar> {
                   style: const TextStyle(color: Colors.white),
                   onChanged: _checkUsername,
                   decoration: _inputDecoration(
-                    'Kullanıcı Adı (@)',
+                    'kullanici_adi'.tr,
                     Iconsax.tag,
                     suffix: _isCheckingUsername
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.cyanAccent))
-                        : (_usernameError == null && _usernameController.text.isNotEmpty
-                            ? const Icon(Icons.check_circle, color: Colors.green)
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.cyanAccent))
+                        : (_usernameError == null &&
+                                _usernameController.text.isNotEmpty
+                            ? const Icon(Icons.check_circle,
+                                color: Colors.green)
                             : null),
                     errorText: _usernameError,
                   ),
@@ -260,9 +293,11 @@ class _AyarlarState extends State<Ayarlar> {
                   controller: TextEditingController(text: kullanici.email),
                   readOnly: true,
                   style: const TextStyle(color: Colors.grey),
-                  decoration: _inputDecoration('E-posta', Iconsax.sms).copyWith(
+                  decoration:
+                      _inputDecoration('eposta'.tr, Iconsax.sms).copyWith(
                     enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.white10)),
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Colors.white10)),
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -270,49 +305,143 @@ class _AyarlarState extends State<Ayarlar> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: _isSaving || _usernameError != null ? null : _saveProfile,
+                    onPressed: _isSaving || _usernameError != null
+                        ? null
+                        : _saveProfile,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.cyanAccent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
                     ),
                     child: _isSaving
                         ? const CircularProgressIndicator(color: Colors.black)
-                        : const Text('Değişiklikleri Kaydet',
-                            style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
+                        : Text('degisiklikleri_kaydet'.tr,
+                            style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(height: 40),
                 const Divider(color: Colors.white10),
                 StreamBuilder<DocumentSnapshot>(
-                  stream: _firestore.collection('users').doc(kullanici.uid).snapshots(),
+                  stream: _firestore
+                      .collection('users')
+                      .doc(kullanici.uid)
+                      .snapshots(),
                   builder: (context, snapshot) {
                     bool profilGizli = false;
                     if (snapshot.hasData && snapshot.data!.exists) {
-                      profilGizli = (snapshot.data!.data() as Map<String, dynamic>)['profilGizli'] ?? false;
+                      profilGizli = (snapshot.data!.data()
+                              as Map<String, dynamic>)['profilGizli'] ??
+                          false;
                     }
                     return Column(
                       children: [
                         _buildSettingsTile(
-                          title: 'Profili Gizle',
-                          subtitle: profilGizli ? 'Profiliniz şu an gizli' : 'Profiliniz herkese açık',
+                          title:
+                              'dildeğiştir'.tr, // Metin çevirisini kullanıyoruz
+                          subtitle: 'Türkçe, English, Deutsch, Français',
+                          icon: Iconsax.language_circle,
+                          onTap: () {
+                            // Dil seçimi dialogunu aç
+                            Get.bottomSheet(
+                              Container(
+                                color: Colors.black,
+                                child: Wrap(
+                                  children: [
+                                    ListTile(
+                                      leading: const Icon(Icons.language,
+                                          color: Colors.white),
+                                      title: const Text('Türkçe',
+                                          style:
+                                              TextStyle(color: Colors.white)),
+                                      onTap: () {
+                                        var locale = const Locale('tr', 'TR');
+                                        Get.updateLocale(locale);
+                                        final box = GetStorage();
+                                        box.write('languageCode', 'tr');
+                                        box.write('countryCode', 'TR');
+                                        Get.back();
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: const Icon(Icons.language,
+                                          color: Colors.white),
+                                      title: const Text('English',
+                                          style:
+                                              TextStyle(color: Colors.white)),
+                                      onTap: () {
+                                        var locale = const Locale('en', 'US');
+                                        Get.updateLocale(locale);
+                                        final box = GetStorage();
+                                        box.write('languageCode', 'en');
+                                        box.write('countryCode', 'US');
+                                        Get.back();
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: const Icon(Icons.language,
+                                          color: Colors.white),
+                                      title: const Text('Deutsch',
+                                          style:
+                                              TextStyle(color: Colors.white)),
+                                      onTap: () {
+                                        var locale = const Locale('de', 'DE');
+                                        Get.updateLocale(locale);
+                                        final box = GetStorage();
+                                        box.write('languageCode', 'de');
+                                        box.write('countryCode', 'DE');
+                                        Get.back();
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: const Icon(Icons.language,
+                                          color: Colors.white),
+                                      title: const Text('Français',
+                                          style:
+                                              TextStyle(color: Colors.white)),
+                                      onTap: () {
+                                        var locale = const Locale('fr', 'FR');
+                                        Get.updateLocale(locale);
+                                        final box = GetStorage();
+                                        box.write('languageCode', 'fr');
+                                        box.write('countryCode', 'FR');
+                                        Get.back();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        _buildSettingsTile(
+                          title: 'profili_gizle'.tr,
+                          subtitle: profilGizli
+                              ? 'profil_gizli_mesaji'.tr
+                              : 'profil_acik_mesaji'.tr,
                           icon: Iconsax.lock,
                           trailing: Switch(
                             value: profilGizli,
                             onChanged: (val) {
-                              _firestore.collection('users').doc(kullanici.uid).update({'profilGizli': val});
+                              _firestore
+                                  .collection('users')
+                                  .doc(kullanici.uid)
+                                  .update({'profilGizli': val});
                             },
                             activeColor: Colors.cyanAccent,
                           ),
                         ),
                         if (kullanici.email == 'nesenosun@gmail.com')
                           _buildSettingsTile(
-                            title: 'Admin Paneli',
+                            title: 'admin_paneli'.tr,
                             icon: Iconsax.setting_2,
                             color: Colors.redAccent,
                             onTap: () => Get.to(() => const AdminSayfasi()),
                           ),
                         _buildSettingsTile(
-                          title: 'Oturumu Kapat',
+                          title: 'oturumu_kapat'.tr,
                           icon: Iconsax.logout,
                           color: Colors.redAccent,
                           onTap: _signOut,
@@ -337,8 +466,10 @@ class _AyarlarState extends State<Ayarlar> {
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border(
-                        left: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
-                        right: BorderSide(color: Colors.white.withOpacity(0.05), width: 1),
+                        left: BorderSide(
+                            color: Colors.white.withOpacity(0.05), width: 1),
+                        right: BorderSide(
+                            color: Colors.white.withOpacity(0.05), width: 1),
                       ),
                     ),
                     child: content,
@@ -355,7 +486,8 @@ class _AyarlarState extends State<Ayarlar> {
     );
   }
 
-  InputDecoration _inputDecoration(String label, IconData icon, {Widget? suffix, String? errorText}) {
+  InputDecoration _inputDecoration(String label, IconData icon,
+      {Widget? suffix, String? errorText}) {
     return InputDecoration(
       labelText: label,
       labelStyle: const TextStyle(color: Colors.cyanAccent),
@@ -364,13 +496,17 @@ class _AyarlarState extends State<Ayarlar> {
       errorText: errorText,
       errorStyle: const TextStyle(color: Colors.redAccent),
       enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.white24)),
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.white24)),
       focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.cyanAccent)),
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.cyanAccent)),
       errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.redAccent)),
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.redAccent)),
       focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.redAccent)),
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.redAccent)),
     );
   }
 
@@ -384,9 +520,14 @@ class _AyarlarState extends State<Ayarlar> {
     return ListTile(
       onTap: onTap,
       leading: Icon(icon, color: color),
-      title: Text(title, style: TextStyle(color: color, fontWeight: FontWeight.w600)),
-      subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 12)) : null,
-      trailing: trailing ?? const Icon(Iconsax.arrow_right_3, color: Colors.white24, size: 18),
+      title: Text(title,
+          style: TextStyle(color: color, fontWeight: FontWeight.w600)),
+      subtitle: subtitle != null
+          ? Text(subtitle,
+              style: const TextStyle(color: Colors.grey, fontSize: 12))
+          : null,
+      trailing: trailing ??
+          const Icon(Iconsax.arrow_right_3, color: Colors.white24, size: 18),
       contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
     );
   }

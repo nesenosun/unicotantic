@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:unicotantic/core/models/post_model.dart';
 import 'package:unicotantic/core/services/social_service.dart';
@@ -127,8 +128,8 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
               icon: const Icon(Iconsax.arrow_left, color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
-            title: const Text('Gönderi',
-                style: TextStyle(color: Colors.white, fontSize: 18)),
+            title: Text('gonderi'.tr,
+                style: const TextStyle(color: Colors.white, fontSize: 18)),
           ),
           bottomNavigationBar: isDesktop
               ? null
@@ -148,9 +149,9 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
                     }
 
                     if (!chainSnapshot.hasData || chainSnapshot.data!.isEmpty) {
-                      return const Center(
-                        child: Text('Gönderi bulunamadı.',
-                            style: TextStyle(color: Colors.white)),
+                      return Center(
+                        child: Text('gonderi_bulunamadi'.tr,
+                            style: const TextStyle(color: Colors.white)),
                       );
                     }
 
@@ -194,16 +195,17 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
                                       Icon(Iconsax.user_minus,
                                           color: Colors.redAccent, size: 60),
                                       const SizedBox(height: 16),
-                                      const Text(
-                                        'Bu gönderi kısıtlanmıştır.',
-                                        style: TextStyle(
+                                      Text(
+                                        'gonderi_kisitli'.tr,
+                                        style: const TextStyle(
                                             color: Colors.white, fontSize: 18),
                                       ),
                                       const SizedBox(height: 8),
-                                      const Text(
-                                        'Engellediğiniz veya sizi engelleyen kullanıcıların içeriklerini göremezsiniz.',
+                                      Text(
+                                        'kisitli_icerik_aciklama'.tr,
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(color: Colors.grey),
+                                        style:
+                                            const TextStyle(color: Colors.grey),
                                       ),
                                     ],
                                   ),
@@ -373,7 +375,7 @@ class _PostAyrintilariState extends State<PostAyrintilari> {
                           controller: _commentController,
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
-                            hintText: 'Yorum yaz...',
+                            hintText: 'yorum_yaz'.tr,
                             hintStyle: TextStyle(color: Colors.grey[600]),
                             filled: true,
                             fillColor: Colors.grey[850],

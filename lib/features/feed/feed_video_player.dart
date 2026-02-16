@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter/foundation.dart'; // kIsWeb için
 
 class FeedVideoPlayer extends StatefulWidget {
   final String videoUrl;
@@ -22,17 +24,34 @@ class _FeedVideoPlayerState extends State<FeedVideoPlayer>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
-      ..initialize().then((_) {
-        if (mounted) {
-          setState(() {
-            _isInitialized = true;
-            _controller.setVolume(0); // Sessiz
-            _controller.setLooping(true); // Döngü
-            if (_isVisible) _controller.play(); // Sadece görünürse oynat
-          });
-        }
-      });
+    _initializePlayer();
+  }
+
+  Future<void> _initializePlayer() async {
+    try {
+      if (kIsWeb) {
+        // Web için doğrudan URL kullan (CacheManager web'de CORS hatası verebilir)
+        _controller =
+            VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
+      } else {
+        // Mobil için CacheManager kullan
+        final file = await DefaultCacheManager().getSingleFile(widget.videoUrl);
+        _controller = VideoPlayerController.file(file);
+      }
+
+      await _controller.initialize();
+
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+          _controller.setVolume(0); // Sessiz
+          _controller.setLooping(true); // Döngü
+          if (_isVisible) _controller.play(); // Sadece görünürse oynat
+        });
+      }
+    } catch (e) {
+      debugPrint("Video yükleme hatası: $e");
+    }
   }
 
   @override

@@ -54,26 +54,31 @@ class _SiteState extends State<Site> {
             _buildHeader(),
             Expanded(
               child: StreamBuilder<DocumentSnapshot>(
-                stream: _firestore.collection('users').doc(kullanici.uid).snapshots(),
+                stream: _firestore
+                    .collection('users')
+                    .doc(kullanici.uid)
+                    .snapshots(),
                 builder: (context, userSnapshot) {
                   int notificationCount = 0;
                   if (userSnapshot.hasData && userSnapshot.data!.exists) {
-                    final userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                    final userData =
+                        userSnapshot.data!.data() as Map<String, dynamic>;
                     notificationCount = userData['notificationCount'] ?? 0;
                   }
 
                   return SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 20),
                     child: Column(
                       children: [
                         _buildDrawerTile(
-                          title: 'AKIŞ',
+                          title: 'akış'.tr,
                           icon: Iconsax.home_2,
                           onTap: () => Get.to(() => const Akis()),
                         ),
                         _buildDrawerTile(
-                          title: 'Profilim',
+                          title: 'profilim'.tr,
                           icon: Iconsax.user,
                           onTap: () => Get.to(() => const KullaniciProfili()),
                         ),
@@ -81,50 +86,56 @@ class _SiteState extends State<Site> {
                         StreamBuilder<QuerySnapshot>(
                           stream: _firestore
                               .collection('chats')
-                              .where('participants', arrayContains: kullanici.uid)
+                              .where('participants',
+                                  arrayContains: kullanici.uid)
                               .snapshots(),
                           builder: (context, chatSnapshot) {
                             bool hasUnread = false;
                             if (chatSnapshot.hasData) {
                               for (var doc in chatSnapshot.data!.docs) {
                                 final data = doc.data() as Map<String, dynamic>;
-                                if (data['lastSenderId'] != kullanici.uid && data['isRead'] == false) {
+                                if (data['lastSenderId'] != kullanici.uid &&
+                                    data['isRead'] == false) {
                                   hasUnread = true;
                                   break;
                                 }
                               }
                             }
                             return _buildDrawerTile(
-                              title: 'Mesajlar',
+                              title: 'mesajlar'.tr,
                               icon: Iconsax.message,
-                              color: hasUnread ? Colors.greenAccent : Colors.white70,
+                              color: hasUnread
+                                  ? Colors.greenAccent
+                                  : Colors.white70,
                               onTap: () => Get.to(() => const ChatListPage()),
                             );
                           },
                         ),
                         _buildDrawerTile(
-                          title: 'Bildirimler',
+                          title: 'bildirimler'.tr,
                           icon: Iconsax.notification,
                           badgeCount: notificationCount,
                           onTap: () => Get.to(() => const Bildirimler()),
                         ),
                         _buildDrawerTile(
-                          title: 'Arkadaşlar',
+                          title: 'arkadaşlar'.tr,
                           icon: Iconsax.people,
                           onTap: () => Get.to(() => const ArkadaslarPage()),
                         ),
                         _buildDrawerTile(
-                          title: 'Takip Ettiklerim',
+                          title: 'takip_ettiklerim'.tr,
                           icon: Iconsax.people,
-                          onTap: () => Get.to(() => const TakipEttiklerimPage()),
+                          onTap: () =>
+                              Get.to(() => const TakipEttiklerimPage()),
                         ),
                         _buildDrawerTile(
-                          title: 'Sessize Alınanlar',
+                          title: 'sessize_alinanlar'.tr,
                           icon: Iconsax.volume_cross,
-                          onTap: () => Get.to(() => const SessizeAlinanlarPage()),
+                          onTap: () =>
+                              Get.to(() => const SessizeAlinanlarPage()),
                         ),
                         _buildDrawerTile(
-                          title: 'Engellenenler',
+                          title: 'engellenenler'.tr,
                           icon: Iconsax.user_minus,
                           onTap: () => Get.to(() => const EngellenenlerPage()),
                         ),
@@ -133,12 +144,12 @@ class _SiteState extends State<Site> {
                           child: Divider(color: Colors.white10),
                         ),
                         _buildDrawerTile(
-                          title: 'Ayarlar',
+                          title: 'ayarlar'.tr,
                           icon: Iconsax.setting_2,
                           onTap: () => Get.to(() => const Ayarlar()),
                         ),
                         _buildDrawerTile(
-                          title: 'Oturumu Kapat',
+                          title: 'oturumu_kapat'.tr,
                           icon: Iconsax.logout,
                           color: Colors.redAccent,
                           onTap: _signOut,
@@ -193,7 +204,8 @@ class _SiteState extends State<Site> {
                 height: 70,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.cyanAccent.withOpacity(0.5), width: 2),
+                  border: Border.all(
+                      color: Colors.cyanAccent.withOpacity(0.5), width: 2),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.cyanAccent.withOpacity(0.2),
